@@ -97,7 +97,12 @@ describe("fetchProducts", () => {
     const result = await fetchProducts();
     expect(result).toHaveLength(2);
     expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
-    expect(mockFetch).toHaveBeenCalledWith("https://rocketcoffee.co.nz/products.json");
+    expect(mockFetch).toHaveBeenCalledWith("https://rocketcoffee.co.nz/products.json", {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
+        Accept: "application/json",
+      },
+    });
   });
 
   it("filters by product_type", async () => {

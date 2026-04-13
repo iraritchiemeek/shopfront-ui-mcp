@@ -6,7 +6,12 @@ export async function fetchProducts(filters?: {
   product_type?: string;
   tag?: string;
 }): Promise<ShopifyProduct[]> {
-  const res = await fetch(`${STORE_URL}/products.json`);
+  const res = await fetch(`${STORE_URL}/products.json`, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
+      Accept: "application/json",
+    },
+  });
   if (!res.ok) {
     throw new Error(`Shopify returned ${res.status}: ${await res.text()}`);
   }
