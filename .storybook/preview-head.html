@@ -1,0 +1,28 @@
+<script>
+  (function () {
+    if (window.parent === window) return;
+    var last = 0;
+    var post = function () {
+      var h = Math.ceil(document.documentElement.scrollHeight);
+      if (h === last) return;
+      last = h;
+      window.parent.postMessage(
+        { type: "shopfront-ui-iframe-height", height: h },
+        "*",
+      );
+    };
+    var tick = function () {
+      post();
+      requestAnimationFrame(post);
+    };
+    window.addEventListener("load", tick);
+    window.addEventListener("resize", tick);
+    if (typeof ResizeObserver === "function") {
+      new ResizeObserver(tick).observe(document.documentElement);
+    }
+    // Cover late-arriving content (images, async renders) after Storybook mounts.
+    setTimeout(tick, 100);
+    setTimeout(tick, 500);
+    setTimeout(tick, 1500);
+  })();
+</script>
