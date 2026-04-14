@@ -12,19 +12,31 @@ const SHOPIFY_HEADERS = {
   Accept: "application/json",
 } as const;
 
+const BLOCKED_HOST_SUFFIXES = [".local", ".internal", ".localhost", ".lan", ".home.arpa"];
+const BLOCKED_HOSTS = new Set(["localhost"]);
+
 async function fetchShopifyJson<T>(url: string): Promise<T> {
   const res = await fetch(url, { headers: SHOPIFY_HEADERS });
   if (!res.ok) {
-    throw new Error(`Shopify returned ${res.status}: ${await res.text()}`);
+    throw new Error(`Shopify returned ${res.status}`);
   }
-  return (await res.json()) as T;
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new Error("Shopify returned non-JSON response");
+  }
+}
+
+function isIpLiteral(hostname: string): boolean {
+  if (hostname.startsWith("[") && hostname.endsWith("]")) return true;
+  return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
 }
 
 export function normaliseStoreOrigin(input: string): string {
   const raw = input.trim();
   if (!raw) throw new Error("Shopify URL is empty");
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) && !/^https?:\/\//i.test(raw)) {
-    throw new Error(`Invalid Shopify URL: ${input} (only http/https supported)`);
+    throw new Error(`Invalid Shopify URL: ${input} (only https supported)`);
   }
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   let url: URL;
@@ -33,8 +45,18 @@ export function normaliseStoreOrigin(input: string): string {
   } catch {
     throw new Error(`Invalid Shopify URL: ${input}`);
   }
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error(`Invalid Shopify URL: ${input} (only http/https supported)`);
+  if (url.protocol !== "https:") {
+    throw new Error(`Invalid Shopify URL: ${input} (only https supported)`);
+  }
+  const host = url.hostname.toLowerCase();
+  if (!host || !host.includes(".")) {
+    throw new Error(`Invalid Shopify URL: ${input} (hostname required)`);
+  }
+  if (isIpLiteral(host)) {
+    throw new Error(`Invalid Shopify URL: ${input} (IP literals not allowed)`);
+  }
+  if (BLOCKED_HOSTS.has(host) || BLOCKED_HOST_SUFFIXES.some((s) => host.endsWith(s))) {
+    throw new Error(`Invalid Shopify URL: ${input} (internal hostnames not allowed)`);
   }
   return url.origin;
 }
