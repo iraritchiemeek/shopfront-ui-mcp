@@ -1,5 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { DynamicWorkerExecutor } from "@cloudflare/codemode";
 import { createMcpHandler } from "agents/mcp";
+import { codeMcpServer } from "./codemode-server.js";
 import { registerAnalyzeTools } from "./tools/analyze.js";
 import { registerProductTools } from "./tools/products.js";
 import { registerRenderTools } from "./tools/render.js";
@@ -16,14 +18,28 @@ interface ServerContext {
   env: Env;
 }
 
-function createServer(context: ServerContext): McpServer {
-  const server = new McpServer({
-    name: "rocket-coffee",
+/**
+ * Build a fresh McpServer per request. Data tools (analyze_site, get_products)
+ * register on baseServer and get collapsed into a single `code` tool by
+ * codeMcpServer. Render tools (render_products, get_cart_url) register on the
+ * returned wrapper so they stay direct tool calls — required for MCP Apps
+ * widget rendering and for the widget itself to call back into the server.
+ */
+async function createServer(context: ServerContext): Promise<McpServer> {
+  const baseServer = new McpServer({
+    name: "rocket-coffee-data",
     version: "1.0.0",
   });
 
-  registerProductTools(server);
-  registerAnalyzeTools(server, { browser: context.env.BROWSER });
+  registerAnalyzeTools(baseServer, { browser: context.env.BROWSER });
+  registerProductTools(baseServer);
+
+  const executor = new DynamicWorkerExecutor({
+    loader: context.env.LOADER,
+    globalOutbound: null,
+  });
+
+  const server = await codeMcpServer({ server: baseServer, executor });
   registerRenderTools(server, {
     getAssetsBaseUrl: () => context.origin,
   });
@@ -69,7 +85,7 @@ export default {
     console.log(`[mcp] ${request.method} ${url.pathname} — ${methodLabel}`);
 
     try {
-      const server = createServer({ origin: url.origin, env });
+      const server = await createServer({ origin: url.origin, env });
       return await createMcpHandler(server)(request, env, ctx);
     } catch (err) {
       const message = err instanceof Error ? `${err.message}\n${err.stack}` : String(err);
