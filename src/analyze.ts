@@ -32,27 +32,32 @@ function isMeaningfulColor(value: string | null | undefined): value is string {
   return true;
 }
 
-function pick<T>(...candidates: (T | null | undefined)[]): T | undefined {
-  for (const c of candidates) if (c != null) return c;
+function pick(...candidates: (string | null | undefined)[]): string | undefined {
+  for (const c of candidates) {
+    if (c == null) continue;
+    const trimmed = c.trim();
+    if (trimmed) return trimmed;
+  }
   return undefined;
 }
 
 function normaliseTokens(raw: RawSignals): BrandTokens {
-  const primary = pick(
-    isMeaningfulColor(raw.btnBg) ? raw.btnBg : null,
-    raw.themeColor,
-    isMeaningfulColor(raw.linkColor) ? raw.linkColor : null,
-  );
-  const accent = pick(
-    isMeaningfulColor(raw.linkColor) ? raw.linkColor : null,
-    raw.themeColor,
-    primary,
-  );
+  const fg = isMeaningfulColor(raw.bodyFg) ? raw.bodyFg : undefined;
+  const primary =
+    pick(
+      isMeaningfulColor(raw.btnBg) ? raw.btnBg : null,
+      raw.themeColor,
+      isMeaningfulColor(raw.linkColor) ? raw.linkColor : null,
+      fg,
+    ) ?? DEFAULT_BRAND_TOKENS.primary;
+  const accent =
+    pick(isMeaningfulColor(raw.linkColor) ? raw.linkColor : null, raw.themeColor, primary) ??
+    DEFAULT_BRAND_TOKENS.accent;
   return {
-    primary: primary ?? DEFAULT_BRAND_TOKENS.primary,
-    accent: accent ?? DEFAULT_BRAND_TOKENS.accent,
+    primary,
+    accent,
     bg: isMeaningfulColor(raw.bodyBg) ? raw.bodyBg : DEFAULT_BRAND_TOKENS.bg,
-    fg: isMeaningfulColor(raw.bodyFg) ? raw.bodyFg : DEFAULT_BRAND_TOKENS.fg,
+    fg: fg ?? DEFAULT_BRAND_TOKENS.fg,
     muted: DEFAULT_BRAND_TOKENS.muted,
     font: raw.bodyFont?.trim() || DEFAULT_BRAND_TOKENS.font,
     radius: raw.btnRadius?.trim() || DEFAULT_BRAND_TOKENS.radius,
