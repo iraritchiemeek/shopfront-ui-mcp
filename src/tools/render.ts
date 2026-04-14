@@ -41,7 +41,7 @@ const productSchema = z.object({
   vendor: z.string(),
   product_type: z.string(),
   tags: z.array(z.string()),
-  variants: z.array(variantSchema),
+  variants: z.array(variantSchema).min(1, "product must have at least one variant"),
   images: z.array(imageSchema),
   options: z.array(optionSchema),
 });
