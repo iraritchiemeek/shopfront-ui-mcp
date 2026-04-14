@@ -26,7 +26,7 @@ const ethiopia: Product = {
   vendor: "Rocket Coffee",
   product_type: "COFFEE",
   tags: ["FILTER", "ETHIOPIA", "SINGLE ORIGIN"],
-  flavor_notes: ["Rhubarb", "Cherry", "Red plum"],
+  subtext: "Rhubarb · Cherry · Red plum",
   images: [{ src: MOCK_IMAGE_SRC, width: 800, height: 800 }],
   options: [
     { name: "WEIGHT", position: 1, values: ["250g", "1kg"] },
@@ -98,7 +98,7 @@ const colombia: Product = {
   vendor: "Rocket Coffee",
   product_type: "COFFEE",
   tags: ["FILTER", "COLOMBIA", "SINGLE ORIGIN"],
-  flavor_notes: ["Passionfruit", "Mango", "Lychee"],
+  subtext: "Passionfruit · Mango · Lychee",
   images: [{ src: MOCK_IMAGE_SRC, width: 800, height: 800 }],
   options: [{ name: "WEIGHT", position: 1, values: ["150g"] }],
   variants: [
@@ -166,7 +166,7 @@ export const SingleProduct: Story = {
   ),
 };
 
-export const NoFlavorNotes: Story = {
+export const NoSubtext: Story = {
   render: () => (
     <ProductCardsView
       data={{ shopify_url: ROCKET_URL, products: [espressoBlend], title: "Espresso" }}
@@ -187,4 +187,84 @@ export const EmptyState: Story = {
 
 export const CartLinkState: Story = {
   render: () => <CartLink url="https://rocketcoffee.co.nz/cart/101:1,201:2" />,
+};
+
+// ── Gearshop: MSR Hubba Hubba Bikepack Tent ─────────────────────────
+
+const msrHubbaHubba: Product = {
+  id: 14879445352815,
+  title: "MSR Hubba Hubba Bikepack Tent",
+  handle: "msr-hubba-hubba-bikepack-tent",
+  body_html:
+    "<p>Designed for the adventurous cyclist whether they ride dirt or pavement, the new Hubba Hubba Bikepack series has been meticulously designed for life on two wheels. Thoughtful features that all cyclists will appreciate married with spacious performance make these tents best-in-class.</p>",
+  vendor: "MSR",
+  product_type: "Tents & Shelters",
+  tags: ["brand:msr", "cat:bikepack shelter", "cat:tents", "msr", "tents"],
+  subtext: "Freestanding bikepacking tent · DAC poles · DuraShield fly",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0278/9779/files/cd9d170d-db2f-433e-af93-27c98c39d727.jpg?v=1769642063",
+      width: 700,
+      height: 357,
+    },
+    {
+      src: "https://cdn.shopify.com/s/files/1/0278/9779/files/d60b65d9-a957-4a75-b808-cde3a3567c41.jpg?v=1769642063",
+      width: 712,
+      height: 437,
+    },
+    {
+      src: "https://cdn.shopify.com/s/files/1/0278/9779/files/233b5107-c09c-4551-bde9-b6d0c7be3ce4.jpg?v=1769642063",
+      width: 700,
+      height: 342,
+    },
+    {
+      src: "https://cdn.shopify.com/s/files/1/0278/9779/files/e2771391-27c7-4bf6-84e5-4d25968adeac.jpg?v=1769642063",
+      width: 700,
+      height: 367,
+    },
+    {
+      src: "https://cdn.shopify.com/s/files/1/0278/9779/files/2002a5be-4a74-4147-ae9c-c2abe7524693.jpg?v=1769642063",
+      width: 700,
+      height: 438,
+    },
+    {
+      src: "https://cdn.shopify.com/s/files/1/0278/9779/files/484df9c5-7a1e-4a55-8b1e-dbb89090082f.jpg?v=1769642063",
+      width: 700,
+      height: 342,
+    },
+  ],
+  options: [{ name: "Size", position: 1, values: ["1 Person", "2 Person"] }],
+  variants: [
+    {
+      id: 52618328539503,
+      title: "1 Person",
+      option1: "1 Person",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "989.10",
+    },
+    {
+      id: 52618328637807,
+      title: "2 Person",
+      option1: "2 Person",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "1187.10",
+    },
+  ],
+};
+
+export const GearshopMsrHubbaHubba: Story = {
+  render: () => (
+    <ProductCardsView
+      data={{
+        shopify_url: "https://www.gearshop.co.nz",
+        title: "Lightweight tents",
+        products: [msrHubbaHubba],
+      }}
+      app={null}
+    />
+  ),
 };

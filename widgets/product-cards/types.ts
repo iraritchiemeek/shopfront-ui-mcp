@@ -22,7 +22,7 @@ export type Product = {
   variants: Variant[];
   images: ProductImage[];
   options: ProductOption[];
-  flavor_notes?: string[];
+  subtext?: string;
 };
 
 export type CardTemplate = "minimal" | "bold" | "editorial";

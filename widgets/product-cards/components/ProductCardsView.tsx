@@ -81,7 +81,7 @@ export function ProductCardsView({ data, app }: Props) {
 
   return (
     <div className="w-full rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40">
-      <div className="max-w-3xl p-8">
+      <div className="px-4 py-8">
         {title && (
           <h2 className="mb-6 text-base font-bold tracking-widest text-brand uppercase">{title}</h2>
         )}
@@ -89,11 +89,12 @@ export function ProductCardsView({ data, app }: Props) {
         {products.length === 0 ? (
           <StatusBanner message="No products to display." />
         ) : (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             {products.map((product: Product) => (
               <ProductCard
                 key={product.id}
                 product={product}
+                shopifyUrl={shopify_url}
                 selection={selections.get(product.id) ?? null}
                 onChange={(next) => setSelection(product.id, next)}
               />

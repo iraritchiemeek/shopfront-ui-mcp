@@ -44,6 +44,12 @@ const productSchema = z.object({
   variants: z.array(variantSchema).min(1, "product must have at least one variant"),
   images: z.array(imageSchema),
   options: z.array(optionSchema),
+  subtext: z
+    .string()
+    .optional()
+    .describe(
+      "Optional short line shown below the title for extra product detail (e.g. roast level, origin, availability).",
+    ),
 });
 
 export interface RenderToolsContext {

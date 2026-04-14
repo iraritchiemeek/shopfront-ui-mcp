@@ -7,5 +7,13 @@
     "directory": "./public",
     "binding": "ASSETS"
   },
-  "worker_loaders": [{ "binding": "LOADER" }]
+  "worker_loaders": [{ "binding": "LOADER" }],
+  "kv_namespaces": [{ "binding": "ABUSE_KV", "id": "d63e24bb09c44dde9c97180b5e66d36c" }],
+  "ratelimits": [
+    {
+      "name": "MCP_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ]
 }
