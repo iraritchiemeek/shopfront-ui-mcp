@@ -27,6 +27,15 @@ async function fetchShopifyJson<T>(url: string): Promise<T> {
   }
 }
 
+async function fetchShopifyEndpoint<T>(storeUrl: string, path: string): Promise<T> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  return fetchShopifyJson<T>(`${origin}${path}`);
+}
+
+export function formatCartItems(items: { variantId: number; quantity: number }[]): string {
+  return items.map((i) => `${i.variantId}:${i.quantity}`).join(",");
+}
+
 function isIpLiteral(hostname: string): boolean {
   if (hostname.startsWith("[") && hostname.endsWith("]")) return true;
   return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
@@ -68,8 +77,7 @@ export async function fetchProducts(
     tag?: string;
   },
 ): Promise<ShopifyProduct[]> {
-  const origin = normaliseStoreOrigin(storeUrl);
-  const data = await fetchShopifyJson<ShopifyProductsResponse>(`${origin}/products.json`);
+  const data = await fetchShopifyEndpoint<ShopifyProductsResponse>(storeUrl, "/products.json");
   let products = data.products;
 
   if (filters?.product_type) {
@@ -86,9 +94,9 @@ export async function fetchProducts(
 }
 
 export async function fetchCollections(storeUrl: string): Promise<ShopifyCollection[]> {
-  const origin = normaliseStoreOrigin(storeUrl);
-  const data = await fetchShopifyJson<ShopifyCollectionsResponse>(
-    `${origin}/collections.json?limit=250`,
+  const data = await fetchShopifyEndpoint<ShopifyCollectionsResponse>(
+    storeUrl,
+    "/collections.json?limit=250",
   );
   return data.collections;
 }
@@ -97,10 +105,10 @@ export async function fetchCollectionProducts(
   storeUrl: string,
   handle: string,
 ): Promise<ShopifyProduct[]> {
-  const origin = normaliseStoreOrigin(storeUrl);
   const encodedHandle = encodeURIComponent(handle);
-  const data = await fetchShopifyJson<ShopifyProductsResponse>(
-    `${origin}/collections/${encodedHandle}/products.json?limit=250`,
+  const data = await fetchShopifyEndpoint<ShopifyProductsResponse>(
+    storeUrl,
+    `/collections/${encodedHandle}/products.json?limit=250`,
   );
   return data.products;
 }
@@ -113,14 +121,14 @@ export async function searchProducts(
   storeUrl: string,
   query: string,
 ): Promise<ShopifyPredictiveProduct[]> {
-  const origin = normaliseStoreOrigin(storeUrl);
   const params = new URLSearchParams({
     q: query,
     "resources[type]": "product",
     "resources[options][unavailable_products]": "hide",
   });
-  const data = await fetchShopifyJson<ShopifyPredictiveSearchResponse>(
-    `${origin}/search/suggest.json?${params.toString()}`,
+  const data = await fetchShopifyEndpoint<ShopifyPredictiveSearchResponse>(
+    storeUrl,
+    `/search/suggest.json?${params.toString()}`,
   );
   return data.resources.results.products ?? [];
 }
@@ -130,6 +138,5 @@ export function buildCartUrl(
   items: { variantId: number; quantity: number }[],
 ): string {
   const origin = normaliseStoreOrigin(storeUrl);
-  const cartItems = items.map((item) => `${item.variantId}:${item.quantity}`).join(",");
-  return `${origin}/cart/${cartItems}`;
+  return `${origin}/cart/${formatCartItems(items)}`;
 }

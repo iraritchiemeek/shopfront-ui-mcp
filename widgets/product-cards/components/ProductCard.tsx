@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Product, ProductImage, ProductOption, Selection, Swatch, Variant } from "../types.js";
+import type { Product, Selection, Variant } from "../types.js";
 import { ProductImageCarousel } from "./ProductImageCarousel.js";
+import { buildProductUrl } from "../../lib/shopifyUrls.js";
+import { productViews, type ProductView } from "../views.js";
 
 interface Props {
   product: Product;
@@ -8,16 +10,6 @@ interface Props {
   selections: ReadonlyMap<number, Selection>;
   onSelectionChange: (productId: number, next: Selection | null) => void;
   onOpenLink: (url: string) => void;
-}
-
-interface ActiveView {
-  id: number;
-  handle: string;
-  title: string;
-  images: ProductImage[];
-  variants: Variant[];
-  options: ProductOption[];
-  swatch?: Swatch;
 }
 
 function formatPrice(amount: string): string {
@@ -40,15 +32,6 @@ function defaultOptionValues(variant: Variant): string[] {
   );
 }
 
-function buildProductUrl(shopifyUrl: string, handle: string): string {
-  try {
-    const u = new URL(shopifyUrl);
-    return `${u.origin}/products/${handle}`;
-  } catch {
-    return `${shopifyUrl.replace(/\/$/, "")}/products/${handle}`;
-  }
-}
-
 export function ProductCard({
   product,
   shopifyUrl,
@@ -56,27 +39,7 @@ export function ProductCard({
   onSelectionChange,
   onOpenLink,
 }: Props) {
-  const views = useMemo<ActiveView[]>(() => {
-    const primary: ActiveView = {
-      id: product.id,
-      handle: product.handle,
-      title: product.title,
-      images: product.images,
-      variants: product.variants,
-      options: product.options,
-      swatch: product.swatch,
-    };
-    const siblingViews: ActiveView[] = (product.siblings ?? []).map((s) => ({
-      id: s.id,
-      handle: s.handle,
-      title: s.title ?? product.title,
-      images: s.images,
-      variants: s.variants,
-      options: s.options,
-      swatch: s.swatch,
-    }));
-    return [primary, ...siblingViews];
-  }, [product]);
+  const views = useMemo<ProductView[]>(() => productViews(product), [product]);
 
   const [activeIdx, setActiveIdx] = useState(0);
   const active = views[activeIdx] ?? views[0]!;

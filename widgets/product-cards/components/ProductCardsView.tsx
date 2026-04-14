@@ -3,21 +3,13 @@ import type { App } from "@modelcontextprotocol/ext-apps/react";
 import type { Payload, Product, Selection } from "../types.js";
 import { ProductCard } from "./ProductCard.js";
 import { BottomBar, type CartLineItem } from "./BottomBar.js";
+import { buildCartUrl } from "../../lib/shopifyUrls.js";
+import { productViews } from "../views.js";
 
 interface Props {
   data: Payload;
   app: App | null;
   openLink?: (url: string) => void;
-}
-
-function buildCartUrl(shopifyUrl: string, items: { variantId: number; quantity: number }[]): string {
-  const parts = items.map((i) => `${i.variantId}:${i.quantity}`).join(",");
-  try {
-    const u = new URL(shopifyUrl);
-    return `${u.origin}/cart/${parts}`;
-  } catch {
-    return `${shopifyUrl.replace(/\/$/, "")}/cart/${parts}`;
-  }
 }
 
 export function ProductCardsView({ data, app: _app, openLink }: Props) {
@@ -63,23 +55,11 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
 
   const lineItems = useMemo<CartLineItem[]>(() => {
     const items: CartLineItem[] = [];
-    const views: Array<{
-      id: number;
-      title: string;
-      variants: typeof products[number]["variants"];
-      images: typeof products[number]["images"];
-    }> = [];
-    for (const p of products) {
-      views.push({ id: p.id, title: p.title, variants: p.variants, images: p.images });
-      for (const s of p.siblings ?? []) {
-        views.push({
-          id: s.id,
-          title: s.title ?? `${p.title} · ${s.swatch.label}`,
-          variants: s.variants,
-          images: s.images,
-        });
-      }
-    }
+    const views = products.flatMap((p) =>
+      productViews(p, {
+        siblingTitle: (parent, s) => s.title ?? `${parent.title} · ${s.swatch.label}`,
+      }),
+    );
     for (const v of views) {
       const sel = selections.get(v.id);
       if (!sel) continue;

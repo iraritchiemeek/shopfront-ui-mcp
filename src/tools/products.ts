@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { fetchProducts } from "../shopify.js";
+import { shopifyUrlSchema } from "./util.js";
 
 export function registerProductTools(server: McpServer): void {
   server.registerTool(
@@ -12,9 +13,7 @@ export function registerProductTools(server: McpServer): void {
         "For 'popular' or 'featured' intents, prefer get_collections first. For keyword search on a large catalogue, prefer search_products. " +
         "Returns: Array<{ id, title, handle, body_html, vendor, product_type, tags, variants: [{ id, title, price, available, ... }], images, options }>. Works with any Shopify store.",
       inputSchema: {
-        shopify_url: z
-          .string()
-          .describe("Shopify store URL, e.g. 'https://example.com' or 'example.myshopify.com'"),
+        shopify_url: shopifyUrlSchema,
         product_type: z
           .string()
           .optional()

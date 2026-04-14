@@ -10,6 +10,7 @@ import { z } from "zod";
 import { buildCartUrl } from "../shopify.js";
 import { PRODUCT_CARDS_URI } from "../widgets/registry.js";
 import { buildAppStubHtml } from "../widgets/stub.js";
+import { shopifyUrlSchema } from "./util.js";
 
 const variantSchema = z.object({
   id: z.number().describe("Shopify variant ID"),
@@ -133,7 +134,7 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
         "IMPORTANT: Render at most 3 products per call. If you have more candidates, pick the top 3 most relevant to the user's request. " +
         "IMPORTANT: After calling this tool, do NOT repeat the product data — the widget displays it visually.",
       inputSchema: {
-        shopify_url: z.string().describe("Shopify store URL the products belong to"),
+        shopify_url: shopifyUrlSchema.describe("Shopify store URL the products belong to"),
         products: z.array(productSchema).describe("Array of Shopify products to display"),
         title: z.string().optional().describe("Optional heading above the cards"),
         template: z
@@ -168,7 +169,7 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
         "by the product-cards widget when the user confirms their selection — not intended for " +
         "direct use by the model.",
       inputSchema: {
-        shopify_url: z.string().describe("Shopify store URL the items belong to"),
+        shopify_url: shopifyUrlSchema.describe("Shopify store URL the items belong to"),
         items: z
           .array(
             z.object({

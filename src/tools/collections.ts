@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { fetchCollections, fetchCollectionProducts } from "../shopify.js";
+import { shopifyUrlSchema } from "./util.js";
 
 export function registerCollectionTools(server: McpServer): void {
   server.registerTool(
@@ -11,7 +12,7 @@ export function registerCollectionTools(server: McpServer): void {
         "Returns: Array<{ id, handle, title, description, products_count, image | null, published_at, updated_at }>. " +
         "Tip: match handles case-insensitively against keywords like /best|popular|top|featured|staff|sale|new/.",
       inputSchema: {
-        shopify_url: z.string().describe("Shopify store URL, e.g. 'https://example.com'"),
+        shopify_url: shopifyUrlSchema,
       },
     },
     async ({ shopify_url }) => {
@@ -30,7 +31,7 @@ export function registerCollectionTools(server: McpServer): void {
         "Order reflects the storefront's manual or automatic sort for that collection as configured by the merchant — if they sort a collection by best-selling, the JSON returns in that order. " +
         "Returns the same product shape as get_products: Array<{ id, title, handle, body_html, vendor, product_type, tags, variants, images, options, ... }>.",
       inputSchema: {
-        shopify_url: z.string().describe("Shopify store URL, e.g. 'https://example.com'"),
+        shopify_url: shopifyUrlSchema,
         handle: z
           .string()
           .describe("Collection handle from get_collections (the URL-safe slug, not the title)"),
