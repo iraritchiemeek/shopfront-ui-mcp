@@ -31,7 +31,6 @@ export type Product = {
   id: number;
   title: string;
   handle: string;
-  body_html: string;
   vendor: string;
   product_type: string;
   tags: string[];

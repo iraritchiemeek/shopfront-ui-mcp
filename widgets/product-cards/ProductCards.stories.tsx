@@ -20,8 +20,6 @@ const ethiopia: Product = {
   id: 1,
   title: "Ethiopia Guji",
   handle: "ethiopia-guji",
-  body_html:
-    "<p>Natural processed. Flavours of rhubarb, cherry & red plum.</p><p>Roasted on 2026-04-10.</p>",
   vendor: "Rocket Coffee",
   product_type: "COFFEE",
   tags: ["FILTER", "ETHIOPIA", "SINGLE ORIGIN"],
@@ -93,7 +91,6 @@ const colombia: Product = {
   id: 2,
   title: "Colombia Finca El Paraíso",
   handle: "colombia-el-paraiso",
-  body_html: "<p>Thermal shock process. Flavours of passionfruit, mango & lychee.</p>",
   vendor: "Rocket Coffee",
   product_type: "COFFEE",
   tags: ["FILTER", "COLOMBIA", "SINGLE ORIGIN"],
@@ -117,7 +114,6 @@ const espressoBlend: Product = {
   id: 3,
   title: "Rocket Espresso Blend",
   handle: "rocket-espresso",
-  body_html: "<p>Chocolate, caramel, hazelnut.</p>",
   vendor: "Rocket Coffee",
   product_type: "COFFEE",
   tags: ["ESPRESSO", "BLEND"],
@@ -190,8 +186,6 @@ const msrHubbaHubba: Product = {
   id: 14879445352815,
   title: "MSR Hubba Hubba Bikepack Tent",
   handle: "msr-hubba-hubba-bikepack-tent",
-  body_html:
-    "<p>Designed for the adventurous cyclist whether they ride dirt or pavement, the new Hubba Hubba Bikepack series has been meticulously designed for life on two wheels. Thoughtful features that all cyclists will appreciate married with spacious performance make these tents best-in-class.</p>",
   vendor: "MSR",
   product_type: "Tents & Shelters",
   tags: ["brand:msr", "cat:bikepack shelter", "cat:tents", "msr", "tents"],
@@ -270,8 +264,6 @@ const mockaOsakaCoffeeTable: Product = {
   id: 10781703799087,
   title: "Osaka Coffee Table - Walnut",
   handle: "osaka-coffee-table-walnut",
-  body_html:
-    "<p>Add timeless style and function to your living room with the Osaka Coffee Table in Walnut. Featuring two sliding drawers for plenty of storage, this piece is perfect for mid-century or Japandi-inspired spaces.</p>",
   vendor: "Mocka New Zealand",
   product_type: "Furniture",
   tags: ["label-rts", "Sub:CoffeeTable", "Type:Furniture"],
@@ -386,7 +378,6 @@ const alpineJacket: Product = {
   id: 900000001,
   title: "Alpine Shell Jacket",
   handle: "alpine-shell-jacket-black",
-  body_html: "<p>Weatherproof three-layer shell for alpine travel.</p>",
   vendor: "Northline",
   product_type: "Jackets",
   tags: ["waterproof", "shell"],
@@ -430,6 +421,68 @@ const alpineJacket: Product = {
       variants: jacketVariants(900000300),
     },
   ],
+};
+
+// ── Real: Sipi Falls (duplicated × 2 for the writing-page demo) ─────
+
+const SIPI_IMG =
+  "https://cdn.shopify.com/s/files/1/0259/2853/files/4C7E7656-35BF-4E98-BE73-D843CAE0B29F.webp?v=1762375306";
+
+const SIPI_GRINDS = [
+  "Whole bean",
+  "Aeropress",
+  "Chemex",
+  "Kalita",
+  "Moccamaster",
+  "Plunger",
+  "Swiss Gold",
+  "V60",
+];
+
+function sipiVariants(idBase: number): Variant[] {
+  return SIPI_GRINDS.map((grind, i) => ({
+    id: idBase + i,
+    title: `250g / ${grind}`,
+    option1: "250g",
+    option2: grind,
+    option3: null,
+    available: true,
+    price: "25.00",
+  }));
+}
+
+function sipiProduct(id: number, idBase: number): Product {
+  return {
+    id,
+    title: "Sipi Falls Organic - SL28 - SL14 [natural] Filter Roast",
+    handle: "sips-falls-organic-sl28-sl14-natural-filter-roast",
+    vendor: "ROCKET COFFEE",
+    product_type: "COFFEE",
+    tags: ["COFFEE", "ETHIOPIA", "FILTER", "SINGLE ORIGIN", "WASHED"],
+    subtext: "Strawberry · Pineapple · Gooseberry",
+    images: [{ src: SIPI_IMG, width: 2846, height: 2846 }],
+    options: [
+      { name: "WEIGHT", position: 1, values: ["250g"] },
+      { name: "GRIND", position: 2, values: SIPI_GRINDS },
+    ],
+    variants: sipiVariants(idBase),
+  };
+}
+
+export const TwoSipiFalls: Story = {
+  render: () => (
+    <ProductCardsView
+      data={{
+        shopify_url: ROCKET_URL,
+        currency: "NZD",
+        products: [
+          sipiProduct(7970648424624, 44828511961264),
+          sipiProduct(7970648424625, 44828511971264),
+        ],
+      }}
+      app={null}
+    />
+  ),
 };
 
 export const SiblingsWithTwoSelects: Story = {

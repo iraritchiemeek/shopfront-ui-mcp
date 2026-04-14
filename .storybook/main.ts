@@ -7,6 +7,9 @@ const config: StorybookConfig = {
   framework: { name: "@storybook/react-vite", options: {} },
   async viteFinal(config) {
     config.plugins = [...(config.plugins ?? []), tailwindcss()];
+    if (process.env.STORYBOOK_BASE_PATH) {
+      config.base = process.env.STORYBOOK_BASE_PATH;
+    }
     return config;
   },
 };

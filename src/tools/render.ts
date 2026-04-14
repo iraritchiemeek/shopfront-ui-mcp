@@ -56,7 +56,6 @@ const productSchema = z.object({
   id: z.number(),
   title: z.string(),
   handle: z.string(),
-  body_html: z.string().describe("Product description. Plain text or HTML. May be truncated."),
   vendor: z.string(),
   product_type: z.string(),
   tags: z.array(z.string()),
@@ -65,9 +64,8 @@ const productSchema = z.object({
   options: z.array(optionSchema),
   subtext: z
     .string()
-    .optional()
     .describe(
-      "Optional short line shown below the title for extra product detail (e.g. roast level, origin, availability).",
+      "1–2 sentence product description shown below the title. Distil this from the product's body_html — strip HTML, pull out the most useful facts (materials, origin, dimensions, flavour notes, key features) and rewrite as a short, natural-language blurb. Always provide — do not leave blank or pass raw HTML. Aim for ~120 chars; hard cap ~240.",
     ),
   swatch: swatchSchema
     .optional()
