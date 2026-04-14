@@ -19,23 +19,16 @@ export function CartLink({ url }: Props) {
         <div className="rounded-xl bg-white p-10 text-center shadow-sm dark:bg-slate-800/60 dark:shadow-none">
           <div className="mb-3 text-2xl font-bold tracking-tight text-brand">Cart ready!</div>
           <p className="mb-6 text-base font-medium text-brand">
-            Click below to open Rocket Coffee with your items pre-loaded.
+            Copy the checkout link below and open it in your browser to complete your order.
           </p>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block rounded-lg bg-brand px-8 py-4 text-base font-bold text-white no-underline transition-colors hover:bg-brand-hover"
-          >
-            Open Checkout →
-          </a>
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="mx-auto mt-4 block cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-brand transition-colors hover:bg-stone-100 dark:hover:bg-slate-800"
+            className="inline-block cursor-pointer rounded-lg bg-brand px-8 py-4 text-base font-bold text-white no-underline transition-colors hover:bg-brand-hover"
           >
-            {copied ? "Copied!" : "Copy link"}
+            {copied ? "Copied!" : "Copy checkout link"}
           </button>
+          <div className="mt-4 break-all text-xs text-stone-500 dark:text-slate-400">{url}</div>
         </div>
       </div>
     </div>
