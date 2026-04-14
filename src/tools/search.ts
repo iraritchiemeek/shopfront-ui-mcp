@@ -9,7 +9,8 @@ export function registerSearchTools(server: McpServer): void {
     {
       description:
         "Keyword search over a Shopify storefront using the store's built-in predictive search. " +
-        "Prefer this when the user named something specific (product name, brand, attribute, keyword) AND the catalogue is likely large. For vague intents like 'popular' or 'featured', use get_collections instead. For semantic matching on descriptions, fall back to get_products and filter in code. " +
+        "Prefer this when the user named something specific (product name, brand, attribute, keyword) AND the catalogue is likely large. For vague intents like 'popular' or 'featured', use get_collections instead. " +
+        "If this tool errors (some storefronts reject the request) or returns too few results, fall back to get_products with the `q` parameter — it does substring matching across title/description/tags and works on every storefront. " +
         "Returns up to 10 results (Shopify-capped) as a LEAN product shape: Array<{ id, handle, title, body, vendor, type, tags, url, price, price_min, price_max, available, featured_image, variants: [{ id, title, price, available, ... }] }>. Note: shape differs from get_products (`body` not `body_html`, no `options`, no per-variant timestamps; URLs are store-relative). render_products rejects this shape — re-fetch full records via get_products and filter by handle before rendering.",
       inputSchema: {
         shopify_url: shopifyUrlSchema,

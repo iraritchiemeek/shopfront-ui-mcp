@@ -7,9 +7,9 @@ export function registerDetectTools(server: McpServer): void {
     "is_shopify",
     {
       description:
-        "Check whether a URL points to a Shopify storefront. Call this FIRST inside `code` before any other catalogue method — if `shopify` is false, return early with `{ shopify: false, reason }` instead of attempting to browse. " +
-        "Detection is based on Shopify response headers (x-shopid, x-shardid, x-shopify-stage), powered-by hints, and markers in the homepage HTML (cdn.shopify.com, Shopify.theme, etc.). " +
-        "Returns: { shopify: boolean, reason?: string }.",
+        "Check whether a URL points to a Shopify storefront AND return the store's ISO 4217 currency code when it is one. Call this FIRST inside `code` before any other catalogue method — if `shopify` is false, return early with `{ shopify: false, reason }` instead of attempting to browse. When shopify is true, pass the `currency` through to `render_products` so prices format correctly. " +
+        "Detection uses Shopify response headers (x-shopid, x-shardid, x-shopify-stage), powered-by hints, and markers in the homepage HTML (cdn.shopify.com, Shopify.theme, etc.). Currency is read from the storefront's /meta.json. " +
+        "Returns: { shopify: boolean, currency?: string, reason?: string }.",
       inputSchema: {
         shopify_url: shopifyUrlSchema,
       },

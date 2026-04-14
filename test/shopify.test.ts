@@ -134,44 +134,6 @@ describe("fetchProducts", () => {
     );
   });
 
-  it("filters by product_type", async () => {
-    mockFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify({ products: sampleProducts })),
-    );
-
-    const result = await fetchProducts(ROCKET, { product_type: "COFFEE" });
-    expect(result).toHaveLength(1);
-    expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
-  });
-
-  it("filters by tag", async () => {
-    mockFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify({ products: sampleProducts })),
-    );
-
-    const result = await fetchProducts(ROCKET, { tag: "FILTER" });
-    expect(result).toHaveLength(1);
-    expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
-  });
-
-  it("filters are case-insensitive", async () => {
-    mockFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify({ products: sampleProducts })),
-    );
-
-    const result = await fetchProducts(ROCKET, { product_type: "coffee" });
-    expect(result).toHaveLength(1);
-  });
-
-  it("returns empty array when no products match filter", async () => {
-    mockFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify({ products: sampleProducts })),
-    );
-
-    const result = await fetchProducts(ROCKET, { tag: "DECAF" });
-    expect(result).toHaveLength(0);
-  });
-
   it("throws on non-OK response", async () => {
     mockFetch.mockResolvedValueOnce(
       new Response("Not Found", { status: 404 }),

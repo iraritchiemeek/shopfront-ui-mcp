@@ -50,6 +50,7 @@ export type Payload = {
   products: Product[];
   title?: string;
   template?: CardTemplate;
+  currency?: string;
 };
 
 export type Selection = { variantId: number; quantity: number };

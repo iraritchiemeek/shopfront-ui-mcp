@@ -1,3 +1,6 @@
+import { useBlobImages } from "../../lib/useBlobImages.js";
+import { formatPrice } from "../../lib/formatPrice.js";
+
 export interface CartLineItem {
   productId: number;
   title: string;
@@ -10,26 +13,23 @@ export interface CartLineItem {
 interface Props {
   items: CartLineItem[];
   totalPrice: number;
+  currency?: string;
   onChangeQuantity: (productId: number, next: number) => void;
   onCheckout: () => void;
 }
 
-function formatPrice(n: number): string {
-  return `$${n.toFixed(2)}`;
-}
-
-export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: Props) {
+export function BottomBar({ items, totalPrice, currency, onChangeQuantity, onCheckout }: Props) {
+  const thumbnailUrls = useBlobImages(items.map((i) => i.thumbnail ?? ""));
   return (
     <div className="sticky bottom-0 mt-8 rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
       <ul className="divide-y divide-stone-200 px-5 dark:divide-slate-700">
-        {items.map((item) => {
+        {items.map((item, idx) => {
           const showVariant = item.variantTitle && item.variantTitle !== "Default Title";
+          const blobUrl = item.thumbnail ? thumbnailUrls[idx] : null;
           return (
             <li key={item.productId} className="flex py-6">
               <div className="size-24 shrink-0 overflow-hidden rounded-md border border-stone-200 bg-stone-100 dark:border-slate-700 dark:bg-slate-700">
-                {item.thumbnail && (
-                  <img src={item.thumbnail} alt="" className="size-full object-cover" />
-                )}
+                {blobUrl && <img src={blobUrl} alt="" className="size-full object-cover" />}
               </div>
 
               <div className="ml-4 flex min-w-0 flex-1 flex-col">
@@ -37,7 +37,7 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
                   <div className="flex justify-between gap-4 text-base font-semibold tracking-tight text-brand dark:text-white">
                     <h3 className="truncate">{item.title}</h3>
                     <p className="ml-4 shrink-0 tabular-nums">
-                      {formatPrice(item.unitPrice * item.quantity)}
+                      {formatPrice(item.unitPrice * item.quantity, currency)}
                     </p>
                   </div>
                   {showVariant && (
@@ -95,7 +95,7 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
 
       <div className="flex items-center justify-between gap-4 border-t border-stone-200 px-5 py-4 dark:border-slate-700">
         <span className="text-lg font-semibold tracking-tight text-brand dark:text-white">
-          Total · {formatPrice(totalPrice)} NZD
+          Total · {formatPrice(totalPrice, currency)}
         </span>
         <button
           type="button"

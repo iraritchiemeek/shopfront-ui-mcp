@@ -27,6 +27,16 @@ async function fetchShopifyJson<T>(url: string): Promise<T> {
   }
 }
 
+async function tryFetchShopifyJson<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url, { headers: SHOPIFY_HEADERS });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchShopifyEndpoint<T>(storeUrl: string, path: string): Promise<T> {
   const origin = normaliseStoreOrigin(storeUrl);
   return fetchShopifyJson<T>(`${origin}${path}`);
@@ -72,7 +82,7 @@ export function normaliseStoreOrigin(input: string): string {
 
 export async function checkIsShopify(
   storeUrl: string,
-): Promise<{ shopify: boolean; reason?: string }> {
+): Promise<{ shopify: boolean; currency?: string; reason?: string }> {
   const origin = normaliseStoreOrigin(storeUrl);
   let res: Response;
   try {
@@ -81,43 +91,30 @@ export async function checkIsShopify(
     return { shopify: false, reason: err instanceof Error ? err.message : String(err) };
   }
   const headers = res.headers;
-  if (headers.get("x-shopid") || headers.get("x-shardid") || headers.get("x-shopify-stage")) {
-    return { shopify: true };
-  }
+  const headerMatch =
+    headers.get("x-shopid") || headers.get("x-shardid") || headers.get("x-shopify-stage");
   const poweredBy = `${headers.get("powered-by") ?? ""} ${headers.get("x-powered-by") ?? ""}`;
-  if (/shopify/i.test(poweredBy)) return { shopify: true };
-  try {
-    const text = await res.text();
-    if (/cdn\.shopify\.com|Shopify\.theme|shopify-features|\/\/shop\.app\//i.test(text)) {
-      return { shopify: true };
+  let isShopify = Boolean(headerMatch) || /shopify/i.test(poweredBy);
+  if (!isShopify) {
+    try {
+      const text = await res.text();
+      if (/cdn\.shopify\.com|Shopify\.theme|shopify-features|\/\/shop\.app\//i.test(text)) {
+        isShopify = true;
+      }
+    } catch {
+      // ignore body read errors — fall through to not-shopify
     }
-  } catch {
-    // ignore body read errors — fall through to not-shopify
   }
-  return { shopify: false, reason: "No Shopify markers found in response headers or HTML" };
+  if (!isShopify) {
+    return { shopify: false, reason: "No Shopify markers found in response headers or HTML" };
+  }
+  const currency = (await fetchShopCurrency(storeUrl)) ?? undefined;
+  return currency ? { shopify: true, currency } : { shopify: true };
 }
 
-export async function fetchProducts(
-  storeUrl: string,
-  filters?: {
-    product_type?: string;
-    tag?: string;
-  },
-): Promise<ShopifyProduct[]> {
+export async function fetchProducts(storeUrl: string): Promise<ShopifyProduct[]> {
   const data = await fetchShopifyEndpoint<ShopifyProductsResponse>(storeUrl, "/products.json");
-  let products = data.products;
-
-  if (filters?.product_type) {
-    const type = filters.product_type.toLowerCase();
-    products = products.filter((p) => p.product_type.toLowerCase() === type);
-  }
-
-  if (filters?.tag) {
-    const tag = filters.tag.toLowerCase();
-    products = products.filter((p) => p.tags.some((t) => t.toLowerCase() === tag));
-  }
-
-  return products;
+  return data.products;
 }
 
 export async function fetchCollections(storeUrl: string): Promise<ShopifyCollection[]> {
@@ -143,21 +140,54 @@ export async function fetchCollectionProducts(
 /**
  * Shopify's predictive search endpoint. Capped by Shopify at 10 results per
  * resource type. Returns the flattened `products` array (may be empty on miss).
+ *
+ * Some storefronts reject the `resources[options][unavailable_products]=hide`
+ * parameter with HTTP 417 — we retry without it on that specific failure.
  */
 export async function searchProducts(
   storeUrl: string,
   query: string,
 ): Promise<ShopifyPredictiveProduct[]> {
-  const params = new URLSearchParams({
-    q: query,
-    "resources[type]": "product",
-    "resources[options][unavailable_products]": "hide",
+  const origin = normaliseStoreOrigin(storeUrl);
+  const base = new URLSearchParams({ q: query, "resources[type]": "product" });
+  const withHide = new URLSearchParams(base);
+  withHide.set("resources[options][unavailable_products]", "hide");
+
+  const firstRes = await fetch(`${origin}/search/suggest.json?${withHide.toString()}`, {
+    headers: SHOPIFY_HEADERS,
   });
-  const data = await fetchShopifyEndpoint<ShopifyPredictiveSearchResponse>(
-    storeUrl,
-    `/search/suggest.json?${params.toString()}`,
-  );
-  return data.resources.results.products ?? [];
+  if (firstRes.ok) {
+    const data = (await firstRes.json()) as ShopifyPredictiveSearchResponse;
+    return data.resources.results.products ?? [];
+  }
+  if (firstRes.status === 417) {
+    const data = await fetchShopifyJson<ShopifyPredictiveSearchResponse>(
+      `${origin}/search/suggest.json?${base.toString()}`,
+    );
+    return data.resources.results.products ?? [];
+  }
+  throw new Error(`Shopify returned ${firstRes.status}`);
+}
+
+/**
+ * Fetch shop currency (ISO 4217) from `/meta.json`. Cached per-origin in
+ * memory. Falls back to `null` if unavailable — callers should default to USD.
+ */
+const currencyCache = new Map<string, string | null>();
+
+interface ShopifyMetaJson {
+  currency?: string;
+  description?: string;
+  name?: string;
+}
+
+export async function fetchShopCurrency(storeUrl: string): Promise<string | null> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  if (currencyCache.has(origin)) return currencyCache.get(origin) ?? null;
+  const meta = await tryFetchShopifyJson<ShopifyMetaJson>(`${origin}/meta.json`);
+  const currency = typeof meta?.currency === "string" ? meta.currency.toUpperCase() : null;
+  currencyCache.set(origin, currency);
+  return currency;
 }
 
 export function buildCartUrl(

@@ -139,12 +139,18 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
           .enum(["minimal", "bold", "editorial"])
           .optional()
           .describe("Card template variant. Defaults to 'minimal'."),
+        currency: z
+          .string()
+          .length(3)
+          .describe(
+            "ISO 4217 currency code (e.g. 'USD', 'JPY', 'NZD'). Get this from the `currency` field of your earlier `is_shopify` call.",
+          ),
       },
       _meta: {
         ui: { resourceUri: PRODUCT_CARDS_URI },
       },
     },
-    async ({ shopify_url, products, title, template }) => {
+    async ({ shopify_url, products, title, template, currency }) => {
       return {
         content: [{ type: "text" as const, text: "Products rendered in widget." }],
         structuredContent: {
@@ -152,6 +158,7 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
           products,
           title,
           template: template ?? "minimal",
+          currency: currency.toUpperCase(),
         } as unknown as Record<string, unknown>,
       };
     },

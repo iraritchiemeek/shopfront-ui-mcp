@@ -23,7 +23,7 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
     },
     [openLink],
   );
-  const { products: rawProducts, title, shopify_url } = data;
+  const { products: rawProducts, title, shopify_url, currency } = data;
   const products = useMemo(() => rawProducts.filter((p) => p.variants.length > 0), [rawProducts]);
   const [selections, setSelections] = useState<Map<number, Selection>>(new Map());
 
@@ -104,6 +104,7 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
                 key={product.id}
                 product={product}
                 shopifyUrl={shopify_url}
+                currency={currency}
                 selections={selections}
                 onSelectionChange={setSelection}
                 onOpenLink={handleOpenLink}
@@ -116,6 +117,7 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
           <BottomBar
             items={lineItems}
             totalPrice={totalPrice}
+            currency={currency}
             onChangeQuantity={setQuantity}
             onCheckout={() => handleOpenLink(cartUrl)}
           />

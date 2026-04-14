@@ -2,19 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product, Selection, Variant } from "../types.js";
 import { ProductImageCarousel } from "./ProductImageCarousel.js";
 import { buildProductUrl } from "../../lib/shopifyUrls.js";
+import { formatPrice } from "../../lib/formatPrice.js";
 import { productViews, type ProductView } from "../views.js";
 
 interface Props {
   product: Product;
   shopifyUrl: string;
+  currency?: string;
   selections: ReadonlyMap<number, Selection>;
   onSelectionChange: (productId: number, next: Selection | null) => void;
   onOpenLink: (url: string) => void;
-}
-
-function formatPrice(amount: string): string {
-  const n = parseFloat(amount);
-  return Number.isNaN(n) ? `$${amount}` : `$${n.toFixed(2)}`;
 }
 
 function findVariant(variants: Variant[], values: string[]): Variant | undefined {
@@ -33,6 +30,7 @@ function defaultOptionValues(variant: Variant): string[] {
 export function ProductCard({
   product,
   shopifyUrl,
+  currency,
   selections,
   onSelectionChange,
   onOpenLink,
@@ -87,7 +85,7 @@ export function ProductCard({
   return (
     <div className="@container overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
       <div className="grid grid-cols-1 gap-x-6 gap-y-6 p-4 @xl:grid-cols-12 @xl:gap-y-8 @xl:p-6 @2xl:gap-x-8">
-        <div className="@xl:col-span-5">
+        <div className="@xl:col-span-5 @xl:self-center">
           <ProductImageCarousel key={active.id} images={active.images} alt={active.title} />
         </div>
 
@@ -97,12 +95,22 @@ export function ProductCard({
           </h2>
 
           <p className="mt-2 text-lg font-semibold text-brand tabular-nums">
-            {formatPrice(selectedVariant.price)}
+            {formatPrice(selectedVariant.price, currency)}
           </p>
 
           {product.subtext && (
             <p className="mt-3 text-sm/6 text-stone-600 dark:text-slate-400">{product.subtext}</p>
           )}
+
+          <p className="mt-3">
+            <button
+              type="button"
+              onClick={() => onOpenLink(buildProductUrl(shopifyUrl, active.handle))}
+              className="cursor-pointer bg-transparent p-0 text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
+            >
+              View full details
+            </button>
+          </p>
 
           {showSwatches && (
             <div className="mt-6">
@@ -213,16 +221,6 @@ export function ProductCard({
                 Added
               </span>
             </button>
-
-            <p className="mt-3 text-center">
-              <button
-                type="button"
-                onClick={() => onOpenLink(buildProductUrl(shopifyUrl, active.handle))}
-                className="cursor-pointer bg-transparent p-0 text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
-              >
-                View full details
-              </button>
-            </p>
           </div>
         </div>
       </div>
