@@ -80,6 +80,12 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
                   connectDomains: ["https://cdn.shopify.com"],
                   resourceDomains: [baseUrl],
                 },
+                sandbox: {
+                  permissions: {
+                    clipboardWrite: {},
+                  },
+                },
+                openLinks: {},
               },
             },
           },

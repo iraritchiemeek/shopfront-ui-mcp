@@ -8,9 +8,20 @@ import { CartLink } from "./CartLink.js";
 interface Props {
   data: Payload;
   app: App | null;
+  openLink?: (url: string) => void;
 }
 
-export function ProductCardsView({ data, app }: Props) {
+export function ProductCardsView({ data, app, openLink }: Props) {
+  const handleOpenLink = useCallback(
+    (url: string) => {
+      if (openLink) {
+        openLink(url);
+      } else {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    },
+    [openLink],
+  );
   const { products: rawProducts, title, shopify_url } = data;
   const products = useMemo(() => rawProducts.filter((p) => p.variants.length > 0), [rawProducts]);
   const [selections, setSelections] = useState<Map<number, Selection>>(new Map());
@@ -97,6 +108,7 @@ export function ProductCardsView({ data, app }: Props) {
                 shopifyUrl={shopify_url}
                 selection={selections.get(product.id) ?? null}
                 onChange={(next) => setSelection(product.id, next)}
+                onOpenLink={handleOpenLink}
               />
             ))}
           </div>

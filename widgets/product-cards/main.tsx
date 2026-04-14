@@ -8,7 +8,9 @@ import type { Payload } from "./types.js";
 function App() {
   return (
     <AppWrapper<Payload> appName="rocket-coffee-product-cards">
-      {({ data, app }) => <ProductCardsView data={data!} app={app} />}
+      {({ data, app, openLink }) => (
+        <ProductCardsView data={data!} app={app} openLink={openLink} />
+      )}
     </AppWrapper>
   );
 }

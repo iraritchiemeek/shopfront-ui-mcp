@@ -7,6 +7,7 @@ interface Props {
   shopifyUrl: string;
   selection: Selection | null;
   onChange: (next: Selection | null) => void;
+  onOpenLink: (url: string) => void;
 }
 
 function formatPrice(amount: string): string {
@@ -32,7 +33,7 @@ function buildProductUrl(shopifyUrl: string, handle: string): string {
   }
 }
 
-export function ProductCard({ product, shopifyUrl, selection, onChange }: Props) {
+export function ProductCard({ product, shopifyUrl, selection, onChange, onOpenLink }: Props) {
   const firstVariant = product.variants[0]!;
   const defaultValues = useMemo(
     () =>
@@ -160,14 +161,13 @@ export function ProductCard({ product, shopifyUrl, selection, onChange }: Props)
             )}
 
             <p className="mt-3 text-center">
-              <a
-                href={buildProductUrl(shopifyUrl, product.handle)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
+              <button
+                type="button"
+                onClick={() => onOpenLink(buildProductUrl(shopifyUrl, product.handle))}
+                className="cursor-pointer bg-transparent p-0 text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
               >
                 View full details
-              </a>
+              </button>
             </p>
           </div>
         </div>
