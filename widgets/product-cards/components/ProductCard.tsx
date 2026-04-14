@@ -27,9 +27,7 @@ function findVariant(variants: Variant[], values: string[]): Variant | undefined
 }
 
 function defaultOptionValues(variant: Variant): string[] {
-  return [variant.option1, variant.option2, variant.option3].filter(
-    (v): v is string => v !== null,
-  );
+  return [variant.option1, variant.option2, variant.option3].filter((v): v is string => v !== null);
 }
 
 export function ProductCard({
@@ -47,8 +45,7 @@ export function ProductCard({
 
   // Option values are scoped per active view. Initialise lazily from each view's first variant.
   const [optionValuesByIdx, setOptionValuesByIdx] = useState<Map<number, string[]>>(new Map());
-  const optionValues =
-    optionValuesByIdx.get(activeIdx) ?? defaultOptionValues(active.variants[0]!);
+  const optionValues = optionValuesByIdx.get(activeIdx) ?? defaultOptionValues(active.variants[0]!);
 
   const selectedVariant = findVariant(active.variants, optionValues) ?? active.variants[0]!;
   const selection = selections.get(active.id) ?? null;
@@ -91,11 +88,7 @@ export function ProductCard({
     <div className="@container overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
       <div className="grid grid-cols-1 gap-x-6 gap-y-6 p-4 @xl:grid-cols-12 @xl:gap-y-8 @xl:p-6 @2xl:gap-x-8">
         <div className="@xl:col-span-5">
-          <ProductImageCarousel
-            key={active.id}
-            images={active.images}
-            alt={active.title}
-          />
+          <ProductImageCarousel key={active.id} images={active.images} alt={active.title} />
         </div>
 
         <div className="flex flex-col @xl:col-span-7">

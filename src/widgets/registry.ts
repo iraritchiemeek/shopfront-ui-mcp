@@ -1,7 +1,7 @@
 /**
  * UI app registry — single source of truth for widget URIs and metadata.
  */
-export const PRODUCT_CARDS_URI = "ui://rocket-coffee/product-cards@v7";
+export const PRODUCT_CARDS_URI = "ui://shopfront-ui/product-cards@v7";
 
 export interface UiApp {
   readonly appKey: string;
@@ -16,7 +16,7 @@ export const UI_APPS: readonly UiApp[] = [
     appKey: "product-cards",
     uri: PRODUCT_CARDS_URI,
     appDir: "product-cards",
-    name: "Rocket Coffee Product Cards",
-    description: "Coffee product cards rendered inline in chat.",
+    name: "Shopify Product Cards",
+    description: "Shopify product cards rendered inline in chat.",
   },
 ];

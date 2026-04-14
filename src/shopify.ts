@@ -8,7 +8,7 @@ import type {
 } from "./types/shopify.js";
 
 const SHOPIFY_HEADERS = {
-  "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
+  "User-Agent": "Mozilla/5.0 (compatible; ShopfrontUiMCP/1.0)",
   Accept: "application/json",
 } as const;
 

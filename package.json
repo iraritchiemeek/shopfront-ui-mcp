@@ -1,7 +1,7 @@
 {
-  "name": "rocket-coffee-mcp",
+  "name": "shopfront-ui-mcp",
   "version": "1.0.0",
-  "description": "MCP server for browsing and ordering from Rocket Coffee",
+  "description": "MCP server for browsing and ordering from any Shopify storefront, with interactive widget UI",
   "private": true,
   "type": "module",
   "scripts": {

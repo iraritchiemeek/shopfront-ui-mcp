@@ -35,9 +35,7 @@ const optionSchema = z.object({
 });
 
 const swatchSchema = z.object({
-  color: z
-    .string()
-    .describe("CSS color for the swatch circle (hex, named, or CSS color string)."),
+  color: z.string().describe("CSS color for the swatch circle (hex, named, or CSS color string)."),
   label: z.string().describe("Human-readable label, e.g. 'Walnut'."),
 });
 

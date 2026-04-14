@@ -57,14 +57,13 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
                       }
                       className="col-start-1 row-start-1 cursor-pointer appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-sm font-medium text-brand outline-1 -outline-offset-1 outline-stone-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand dark:bg-white/5 dark:text-white dark:outline-white/10 dark:*:bg-slate-800 dark:focus-visible:outline-brand"
                     >
-                      {Array.from(
-                        { length: Math.max(10, item.quantity) },
-                        (_, i) => i + 1,
-                      ).map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
+                      {Array.from({ length: Math.max(10, item.quantity) }, (_, i) => i + 1).map(
+                        (n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ),
+                      )}
                     </select>
                     <svg
                       viewBox="0 0 16 16"

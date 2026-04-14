@@ -199,7 +199,7 @@ export async function codeMcpServer(options: {
     () => example,
   );
 
-  const codemodeServer = new McpServer({ name: "rocket-coffee", version: "1.0.0" });
+  const codemodeServer = new McpServer({ name: "shopfront-ui", version: "1.0.0" });
   codemodeServer.registerTool(
     "code",
     {

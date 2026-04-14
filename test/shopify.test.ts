@@ -107,7 +107,7 @@ describe("fetchProducts", () => {
     expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
     expect(mockFetch).toHaveBeenCalledWith("https://rocketcoffee.co.nz/products.json", {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; ShopfrontUiMCP/1.0)",
         Accept: "application/json",
       },
     });

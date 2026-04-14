@@ -39,7 +39,7 @@ interface ServerContext {
  */
 async function createServer(context: ServerContext): Promise<McpServer> {
   const baseServer = new McpServer({
-    name: "rocket-coffee-data",
+    name: "shopfront-ui-data",
     version: "1.0.0",
   });
 

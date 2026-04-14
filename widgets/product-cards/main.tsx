@@ -7,10 +7,8 @@ import type { Payload } from "./types.js";
 
 function App() {
   return (
-    <AppWrapper<Payload> appName="rocket-coffee-product-cards">
-      {({ data, app, openLink }) => (
-        <ProductCardsView data={data!} app={app} openLink={openLink} />
-      )}
+    <AppWrapper<Payload> appName="shopfront-ui-product-cards">
+      {({ data, app, openLink }) => <ProductCardsView data={data!} app={app} openLink={openLink} />}
     </AppWrapper>
   );
 }

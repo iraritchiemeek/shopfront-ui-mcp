@@ -1,5 +1,5 @@
 {
-  "name": "rocket-coffee-mcp",
+  "name": "shopfront-ui-mcp",
   "main": "src/index.ts",
   "compatibility_date": "2026-03-01",
   "compatibility_flags": ["nodejs_compat"],

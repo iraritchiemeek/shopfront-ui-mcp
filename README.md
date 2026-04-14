@@ -20,8 +20,8 @@ Rocket Coffee (`rocketcoffee.co.nz`) is the reference store used in development 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/iraritchiemeek/rocket-coffee-mcp
-cd rocket-coffee-mcp
+git clone https://github.com/iraritchiemeek/shopfront-ui-mcp
+cd shopfront-ui-mcp
 pnpm install
 ```
 
@@ -60,7 +60,7 @@ Once deployed:
 
 1. Open **Settings > Connectors** (or **Customize > Connectors**).
 2. Click **Add custom connector**.
-3. Enter your deployed URL with `/mcp` appended, e.g. `https://rocket-coffee-mcp.<your-subdomain>.workers.dev/mcp`.
+3. Enter your deployed URL with `/mcp` appended, e.g. `https://shopfront-ui-mcp.<your-subdomain>.workers.dev/mcp`.
 4. Click **Add**, then **Connect**.
 
 Note: custom connectors require a paid Claude plan (Pro, Max, Team, or Enterprise). Free accounts are limited to a single connector.
@@ -93,7 +93,7 @@ pnpm run deploy
 
 (`pnpm run deploy` — not `pnpm deploy`; the bare form is reserved by pnpm.)
 
-Wrangler prints the deployed URL, e.g. `https://rocket-coffee-mcp.<your-subdomain>.workers.dev`. Use this URL with `/mcp` appended when connecting from [Claude Code](#claude-code-cli) or the [Claude desktop app](#claude-desktop-app).
+Wrangler prints the deployed URL, e.g. `https://shopfront-ui-mcp.<your-subdomain>.workers.dev`. Use this URL with `/mcp` appended when connecting from [Claude Code](#claude-code-cli) or the [Claude desktop app](#claude-desktop-app).
 
 ## Available Tools
 

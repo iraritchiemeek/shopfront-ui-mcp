@@ -97,7 +97,7 @@ LLM invokes the `code` tool with an async arrow that calls `codemode.get_product
 
 ### Widget URI versioning
 
-The `@vN` suffix in `ui://rocket-coffee/<widget>@vN` is **static** in normal operation — the resource is replaced in place, so bumping the version is a no-op. Only bump when the *serving model itself* changes (e.g., the migration to Static Assets bumped to `@v7`). Treat this as a rare event.
+The `@vN` suffix in `ui://shopfront-ui/<widget>@vN` is **static** in normal operation — the resource is replaced in place, so bumping the version is a no-op. Only bump when the *serving model itself* changes (e.g., the migration to Static Assets bumped to `@v7`). Treat this as a rare event.
 
 ## Testing
 
