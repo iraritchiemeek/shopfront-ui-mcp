@@ -84,9 +84,22 @@ const trim = (p) => ({
     option1: v.option1, option2: v.option2, option3: v.option3,
     available: v.available, price: v.price,
   })),
-  images: p.images.slice(0, 1).map(i => ({ src: i.src, width: i.width, height: i.height })),
+  images: p.images.slice(0, 5).map(i => ({ src: i.src, width: i.width, height: i.height })),
   options: p.options,
 });
+\`\`\`
+
+## Always start with \`is_shopify\`
+
+Before any catalogue call, verify the URL points to a Shopify store. If it doesn't, return early — \`get_products\`/\`get_collections\`/\`search_products\` will fail or return garbage on non-Shopify sites.
+
+\`\`\`js
+async () => {
+  const url = "https://example.com";
+  const check = await codemode.is_shopify({ shopify_url: url });
+  if (!check.shopify) return { shopify: false, reason: check.reason };
+  // ... proceed with catalogue calls below
+}
 \`\`\`
 
 ## Typical flow

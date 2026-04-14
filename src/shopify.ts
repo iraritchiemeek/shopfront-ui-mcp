@@ -70,6 +70,33 @@ export function normaliseStoreOrigin(input: string): string {
   return url.origin;
 }
 
+export async function checkIsShopify(
+  storeUrl: string,
+): Promise<{ shopify: boolean; reason?: string }> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  let res: Response;
+  try {
+    res = await fetch(origin, { headers: SHOPIFY_HEADERS, redirect: "follow" });
+  } catch (err) {
+    return { shopify: false, reason: err instanceof Error ? err.message : String(err) };
+  }
+  const headers = res.headers;
+  if (headers.get("x-shopid") || headers.get("x-shardid") || headers.get("x-shopify-stage")) {
+    return { shopify: true };
+  }
+  const poweredBy = `${headers.get("powered-by") ?? ""} ${headers.get("x-powered-by") ?? ""}`;
+  if (/shopify/i.test(poweredBy)) return { shopify: true };
+  try {
+    const text = await res.text();
+    if (/cdn\.shopify\.com|Shopify\.theme|shopify-features|\/\/shop\.app\//i.test(text)) {
+      return { shopify: true };
+    }
+  } catch {
+    // ignore body read errors — fall through to not-shopify
+  }
+  return { shopify: false, reason: "No Shopify markers found in response headers or HTML" };
+}
+
 export async function fetchProducts(
   storeUrl: string,
   filters?: {

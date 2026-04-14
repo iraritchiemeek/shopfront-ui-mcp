@@ -3,6 +3,7 @@ import { DynamicWorkerExecutor } from "@cloudflare/codemode";
 import { createMcpHandler } from "agents/mcp";
 import { codeMcpServer } from "./codemode-server.js";
 import { registerCollectionTools } from "./tools/collections.js";
+import { registerDetectTools } from "./tools/detect.js";
 import { registerProductTools } from "./tools/products.js";
 import { registerRenderTools } from "./tools/render.js";
 import { registerSearchTools } from "./tools/search.js";
@@ -43,6 +44,7 @@ async function createServer(context: ServerContext): Promise<McpServer> {
     version: "1.0.0",
   });
 
+  registerDetectTools(baseServer);
   registerProductTools(baseServer);
   registerCollectionTools(baseServer);
   registerSearchTools(baseServer);
