@@ -17,9 +17,7 @@ export function CartLink({ url }: Props) {
     <div className="w-full rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40">
       <div className="max-w-3xl p-6">
         <div className="rounded-xl bg-white p-10 text-center shadow-sm dark:bg-slate-800/60 dark:shadow-none">
-          <div className="mb-3 text-2xl font-bold tracking-tight text-brand">
-            Cart ready!
-          </div>
+          <div className="mb-3 text-2xl font-bold tracking-tight text-brand">Cart ready!</div>
           <p className="mb-6 text-base font-medium text-brand">
             Click below to open Rocket Coffee with your items pre-loaded.
           </p>

@@ -5,12 +5,7 @@ interface Props {
   isGenerating: boolean;
 }
 
-export function BottomBar({
-  totalItems,
-  totalPrice,
-  onGenerate,
-  isGenerating,
-}: Props) {
+export function BottomBar({ totalItems, totalPrice, onGenerate, isGenerating }: Props) {
   const itemLabel = totalItems === 1 ? "item" : "items";
   return (
     <div className="sticky bottom-0 mt-8 flex items-center justify-between gap-4 rounded-xl bg-white px-6 py-5 shadow-lg dark:bg-slate-800 dark:shadow-none">

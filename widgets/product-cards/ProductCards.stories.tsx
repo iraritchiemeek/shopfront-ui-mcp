@@ -177,10 +177,7 @@ export const Default: Story = {
 
 export const SingleProduct: Story = {
   render: () => (
-    <ProductCardsView
-      data={{ shopify_url: ROCKET_URL, products: [colombia] }}
-      app={null}
-    />
+    <ProductCardsView data={{ shopify_url: ROCKET_URL, products: [colombia] }} app={null} />
   ),
 };
 
@@ -195,21 +192,91 @@ export const NoFlavorNotes: Story = {
 
 export const ManyVariants: Story = {
   render: () => (
+    <ProductCardsView data={{ shopify_url: ROCKET_URL, products: [ethiopia] }} app={null} />
+  ),
+};
+
+export const EmptyState: Story = {
+  render: () => <ProductCardsView data={{ shopify_url: ROCKET_URL, products: [] }} app={null} />,
+};
+
+export const CartLinkState: Story = {
+  render: () => <CartLink url="https://rocketcoffee.co.nz/cart/101:1,201:2" />,
+};
+
+// ── Tokenised stories (simulating analyze_site output) ─────────────
+
+const rocketTokens = {
+  primary: "rgb(255, 66, 52)",
+  accent: "rgb(255, 66, 52)",
+  bg: "#ffffff",
+  fg: "#111111",
+  muted: "#6b6b6b",
+  font: "Roboto",
+  radius: "0.5rem",
+  siteName: "Rocket Coffee",
+};
+
+const allpressTokens = {
+  primary: "#000000",
+  accent: "#c41e3a",
+  bg: "#f5f2ea",
+  fg: "#1a1a1a",
+  muted: "#6b6b6b",
+  font: '"Suisse Intl", Helvetica, sans-serif',
+  radius: "0px",
+  siteName: "Allpress Espresso",
+};
+
+const indieTokens = {
+  primary: "#2f5d50",
+  accent: "#d4a373",
+  bg: "#faedcd",
+  fg: "#1d3557",
+  muted: "#8d7d6a",
+  font: "Georgia, serif",
+  radius: "1.25rem",
+  siteName: "Forest & Field",
+};
+
+export const ThemedRocket: Story = {
+  render: () => (
     <ProductCardsView
-      data={{ shopify_url: ROCKET_URL, products: [ethiopia] }}
+      data={{
+        shopify_url: ROCKET_URL,
+        title: "Filter coffees",
+        products: [ethiopia, colombia],
+        tokens: rocketTokens,
+      }}
       app={null}
     />
   ),
 };
 
-export const EmptyState: Story = {
+export const ThemedAllpress: Story = {
   render: () => (
-    <ProductCardsView data={{ shopify_url: ROCKET_URL, products: [] }} app={null} />
+    <ProductCardsView
+      data={{
+        shopify_url: "https://allpress.co.nz",
+        title: "Signature blends",
+        products: [ethiopia, colombia],
+        tokens: allpressTokens,
+      }}
+      app={null}
+    />
   ),
 };
 
-export const CartLinkState: Story = {
+export const ThemedIndie: Story = {
   render: () => (
-    <CartLink url="https://rocketcoffee.co.nz/cart/101:1,201:2" />
+    <ProductCardsView
+      data={{
+        shopify_url: "https://forestandfield.example",
+        title: "This month's beans",
+        products: [ethiopia, colombia],
+        tokens: indieTokens,
+      }}
+      app={null}
+    />
   ),
 };

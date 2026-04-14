@@ -21,10 +21,7 @@ function Spinner(): ReactElement {
   );
 }
 
-export function AppWrapper<T>({
-  children,
-  ...options
-}: AppWrapperProps<T>): ReactElement {
+export function AppWrapper<T>({ children, ...options }: AppWrapperProps<T>): ReactElement {
   const toolResult = useToolResult<T>(options);
   const { data, isConnected, error, isCancelled, containerDimensions } = toolResult;
 
@@ -59,9 +56,7 @@ export function AppWrapper<T>({
           </span>
         )}
         {error && !isCancelled && (
-          <span className="text-sm text-red-600 dark:text-red-400">
-            {error.message}
-          </span>
+          <span className="text-sm text-red-600 dark:text-red-400">{error.message}</span>
         )}
       </div>
     );

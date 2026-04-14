@@ -73,9 +73,7 @@ export function ProductCardsView({ data, app }: Props) {
         setCartUrl(url);
       }
     } catch (err) {
-      setCartError(
-        `Failed to generate cart link: ${(err as Error).message ?? "unknown error"}`,
-      );
+      setCartError(`Failed to generate cart link: ${(err as Error).message ?? "unknown error"}`);
     } finally {
       setIsGenerating(false);
     }
@@ -92,9 +90,7 @@ export function ProductCardsView({ data, app }: Props) {
     >
       <div className="max-w-3xl p-8">
         {title && (
-          <h2 className="mb-6 text-base font-bold tracking-widest text-brand uppercase">
-            {title}
-          </h2>
+          <h2 className="mb-6 text-base font-bold tracking-widest text-brand uppercase">{title}</h2>
         )}
 
         {products.length === 0 ? (
@@ -131,13 +127,7 @@ export function ProductCardsView({ data, app }: Props) {
   );
 }
 
-function StatusBanner({
-  message,
-  tone = "info",
-}: {
-  message: string;
-  tone?: "info" | "error";
-}) {
+function StatusBanner({ message, tone = "info" }: { message: string; tone?: "info" | "error" }) {
   const cls =
     tone === "error"
       ? "rounded-xl border-l-4 border-red-400 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-300"

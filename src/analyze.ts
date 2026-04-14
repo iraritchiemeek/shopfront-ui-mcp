@@ -8,7 +8,7 @@
  * no heuristic scoring — if a signal is missing we fall back to sane
  * defaults rather than guessing.
  */
-import puppeteer from "@cloudflare/puppeteer";
+import { launch } from "@cloudflare/puppeteer";
 import { normaliseStoreOrigin } from "./shopify.js";
 import { DEFAULT_BRAND_TOKENS, type BrandTokens } from "../widgets/lib/brand.js";
 
@@ -63,37 +63,32 @@ function normaliseTokens(raw: RawSignals): BrandTokens {
 
 export async function analyzeSite(storeUrl: string, browserBinding: Fetcher): Promise<BrandTokens> {
   const origin = normaliseStoreOrigin(storeUrl);
-  const browser = await puppeteer.launch(browserBinding);
+  const browser = await launch(browserBinding);
   try {
     const page = await browser.newPage();
     await page.goto(origin, { waitUntil: "domcontentloaded", timeout: 20_000 });
 
     const raw: RawSignals = await page.evaluate(() => {
-      const pickEl = (selector: string): Element | null => document.querySelector(selector);
       const body = getComputedStyle(document.body);
 
-      const btn = pickEl(
+      const btn = document.querySelector(
         "button[type=submit], .btn--primary, .button--primary, .Button--primary, button.btn, a.btn, button",
       );
       const btnStyle = btn ? getComputedStyle(btn) : null;
 
-      const link = pickEl("a[href]");
+      const link = document.querySelector("a[href]");
       const linkStyle = link ? getComputedStyle(link) : null;
 
-      const logo = pickEl(
+      const logo = document.querySelector(
         "header img, .logo img, a[aria-label*='logo' i] img, a[href='/'] img",
       ) as HTMLImageElement | null;
 
       const themeColor =
-        document
-          .querySelector('meta[name="theme-color"]')
-          ?.getAttribute("content")
-          ?.trim() ?? null;
+        document.querySelector('meta[name="theme-color"]')?.getAttribute("content")?.trim() ?? null;
       const siteName =
-        document
-          .querySelector('meta[property="og:site_name"]')
-          ?.getAttribute("content")
-          ?.trim() ?? document.title?.trim() ?? null;
+        document.querySelector('meta[property="og:site_name"]')?.getAttribute("content")?.trim() ??
+        document.title?.trim() ??
+        null;
 
       return {
         themeColor,

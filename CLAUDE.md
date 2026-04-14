@@ -22,24 +22,24 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Architecture
 
-Cloudflare Worker serving an MCP server for browsing and ordering from Rocket Coffee (rocketcoffee.co.nz), a Shopify store.
+Cloudflare Worker serving an MCP server that can browse and order from **any** Shopify storefront. Rocket Coffee (rocketcoffee.co.nz) is the reference store.
 
 ### Request flow
 
 1. MCP client sends a request to the Worker
 2. `createMcpHandler` (from `agents/mcp`) handles MCP Streamable HTTP transport
-3. Tools are registered directly on `McpServer` — no codemode, no sandbox
-4. `get_products` fetches the Shopify `/products.json` endpoint (public, no auth)
-5. `render_products` passes curated product data to the product-cards widget
-6. Widget handles cart flow autonomously via `get_cart_url`
+3. Data tools (`analyze_site`, `get_products`) register on a base `McpServer`, then `codeMcpServer` (`src/codemode-server.ts`) collapses them into a single `code` tool. The model writes a JS async arrow that calls `codemode.*` methods; the code runs in an isolated Dynamic Worker (`env.LOADER`, `globalOutbound: null`).
+4. Render tools (`render_products`, `get_cart_url`) register on the wrapper server **after** the codemode wrap so they remain direct MCP tool calls — required for the MCP Apps widget to mount and for the widget to call back into the host.
+5. `analyze_site` visits the target storefront via the Browser Rendering binding (`env.BROWSER` + `@cloudflare/puppeteer`) and returns `BrandTokens` (primary/accent/bg/fg/font/radius/logoUrl/siteName).
+6. The widget receives `tokens` in its payload and applies them as `--rc-brand-*` CSS variables on its root; Tailwind utility classes resolve through those vars.
 
 ### Data source
 
-Shopify's public `/products.json` endpoint. No API key needed. ~40 products, fetched in full and filtered client-side.
+Shopify's public `/products.json` endpoint on whichever storefront the model passes in. No API key needed.
 
 ### Cart URL
 
-Shopify cart permalink: `https://rocketcoffee.co.nz/cart/VARIANT_ID:QTY,VARIANT_ID:QTY`. Opens checkout with items pre-loaded.
+Shopify cart permalink: `{origin}/cart/VARIANT_ID:QTY,VARIANT_ID:QTY`. `buildCartUrl(storeUrl, items)` in `src/shopify.ts`. The widget passes the `shopify_url` it received in its payload back to `get_cart_url`.
 
 ## MCP Apps widgets
 
@@ -59,15 +59,23 @@ The stub references JS/CSS via the request origin (`src/index.ts` passes `url.or
 widgets/
   product-cards/
     main.tsx                 — entry point
-    style.css                — Tailwind + brand tokens
-    types.ts
+    style.css                — Tailwind + brand tokens (CSS vars)
+    types.ts                 — Payload, Product, CardTemplate
     components/              — pure React view components
     ProductCards.stories.tsx — Storybook stories
   lib/
     AppWrapper.tsx           — shared host connection / loading / error
     useToolResult.ts         — shared hook (useApp + useHostStyles + plumbing)
+    brand.ts                 — BrandTokens type + tokensToCssVars helper
 
 src/
+  analyze.ts                 — Browser Rendering token extraction
+  codemode-server.ts         — collapses data tools into `code`
+  shopify.ts                 — fetchProducts(storeUrl, filters), buildCartUrl(storeUrl, items)
+  tools/
+    analyze.ts               — analyze_site
+    products.ts              — get_products
+    render.ts                — render_products + get_cart_url
   widgets/
     registry.ts              — UI_APPS list, URI constants
     stub.ts                  — buildAppStubHtml
@@ -81,7 +89,7 @@ scripts/build-widgets.ts     — discovers widgets, runs Vite in parallel
 
 ### Data flow
 
-LLM calls `get_products` → filters/curates → calls `render_products` with product data → widget renders cards → user picks items → widget calls `get_cart_url` → displays checkout link.
+LLM invokes the `code` tool with an async arrow that does `Promise.all([codemode.analyze_site(...), codemode.get_products(...)])`, curates the result, and returns `{ tokens, products }`. The LLM then calls `render_products` directly with `{ shopify_url, products, tokens, template }` → widget renders themed cards → user picks items → widget calls `get_cart_url({ shopify_url, items })` → displays checkout link.
 
 ### Adding a new widget
 

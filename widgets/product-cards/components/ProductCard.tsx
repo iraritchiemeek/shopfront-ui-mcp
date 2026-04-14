@@ -62,8 +62,7 @@ export function ProductCard({ product, selection, onChange }: Props) {
   );
   const [optionValues, setOptionValues] = useState<string[]>(defaultValues);
 
-  const selectedVariant =
-    findVariant(product, optionValues) ?? firstVariant;
+  const selectedVariant = findVariant(product, optionValues) ?? firstVariant;
   const qty = selection?.quantity ?? 0;
 
   const blobUrl = useBlobImage(product.images[0]?.src);

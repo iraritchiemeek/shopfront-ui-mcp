@@ -4,10 +4,7 @@
  * render_products: model-facing tool that passes curated product data to the widget.
  * get_cart_url: widget-callable tool that generates a Shopify cart permalink.
  */
-import {
-  registerAppTool,
-  RESOURCE_MIME_TYPE,
-} from "@modelcontextprotocol/ext-apps/server";
+import { registerAppTool, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { buildCartUrl } from "../shopify.js";
@@ -74,10 +71,7 @@ export interface RenderToolsContext {
   getAssetsBaseUrl: () => string;
 }
 
-export function registerRenderTools(
-  server: McpServer,
-  context: RenderToolsContext,
-): void {
+export function registerRenderTools(server: McpServer, context: RenderToolsContext): void {
   server.registerResource(
     "product-cards",
     PRODUCT_CARDS_URI,

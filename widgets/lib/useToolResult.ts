@@ -6,11 +6,7 @@
  * (setters like `app.ontoolresult` rather than `setNotificationHandler`).
  */
 import { useCallback, useEffect, useState } from "react";
-import {
-  type App,
-  useApp,
-  useHostStyles,
-} from "@modelcontextprotocol/ext-apps/react";
+import { type App, useApp, useHostStyles } from "@modelcontextprotocol/ext-apps/react";
 
 export interface UseToolResultOptions {
   /** App name reported to the host. */
@@ -59,8 +55,7 @@ export function useToolResult<T = unknown>({
   const [data, setData] = useState<T | null>(null);
   const [parseError, setParseError] = useState<Error | null>(null);
   const [isCancelled, setIsCancelled] = useState(false);
-  const [containerDimensions, setContainerDimensions] =
-    useState<ContainerDimensions | null>(null);
+  const [containerDimensions, setContainerDimensions] = useState<ContainerDimensions | null>(null);
 
   const {
     app,
@@ -102,9 +97,7 @@ export function useToolResult<T = unknown>({
   useEffect(() => {
     if (isConnected && app) {
       const ctx = app.getHostContext();
-      setContainerDimensions(
-        extractContainerDimensions(ctx as unknown as Record<string, unknown>),
-      );
+      setContainerDimensions(extractContainerDimensions(ctx as unknown as Record<string, unknown>));
     }
   }, [isConnected, app]);
 
@@ -122,9 +115,7 @@ export function useToolResult<T = unknown>({
   const refreshContainerDimensions = useCallback(() => {
     if (!app) return;
     const ctx = app.getHostContext();
-    setContainerDimensions(
-      extractContainerDimensions(ctx as unknown as Record<string, unknown>),
-    );
+    setContainerDimensions(extractContainerDimensions(ctx as unknown as Record<string, unknown>));
   }, [app]);
 
   const error = connectionError ?? parseError;
