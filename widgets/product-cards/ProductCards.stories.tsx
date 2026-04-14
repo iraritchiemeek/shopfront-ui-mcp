@@ -423,12 +423,9 @@ const alpineJacket: Product = {
   ],
 };
 
-// ── Real: Sipi Falls (duplicated × 2 for the writing-page demo) ─────
+// ── Real: Rocket Coffee fruity filter roasts (writing-page demo) ────
 
-const SIPI_IMG =
-  "https://cdn.shopify.com/s/files/1/0259/2853/files/4C7E7656-35BF-4E98-BE73-D843CAE0B29F.webp?v=1762375306";
-
-const SIPI_GRINDS = [
+const ROCKET_GRINDS = [
   "Whole bean",
   "Aeropress",
   "Chemex",
@@ -439,46 +436,227 @@ const SIPI_GRINDS = [
   "V60",
 ];
 
-function sipiVariants(idBase: number): Variant[] {
-  return SIPI_GRINDS.map((grind, i) => ({
+function rocketGrindVariants(idBase: number, price: string): Variant[] {
+  return ROCKET_GRINDS.map((grind, i) => ({
     id: idBase + i,
     title: `250g / ${grind}`,
     option1: "250g",
     option2: grind,
     option3: null,
     available: true,
-    price: "25.00",
+    price,
   }));
 }
 
-function sipiProduct(id: number, idBase: number): Product {
-  return {
-    id,
-    title: "Sipi Falls Organic - SL28 - SL14 [natural] Filter Roast",
-    handle: "sips-falls-organic-sl28-sl14-natural-filter-roast",
-    vendor: "ROCKET COFFEE",
-    product_type: "COFFEE",
-    tags: ["COFFEE", "ETHIOPIA", "FILTER", "SINGLE ORIGIN", "WASHED"],
-    subtext: "Strawberry · Pineapple · Gooseberry",
-    images: [{ src: SIPI_IMG, width: 2846, height: 2846 }],
-    options: [
-      { name: "WEIGHT", position: 1, values: ["250g"] },
-      { name: "GRIND", position: 2, values: SIPI_GRINDS },
-    ],
-    variants: sipiVariants(idBase),
-  };
-}
+const sipiFalls: Product = {
+  id: 7970648424624,
+  title: "Sipi Falls Organic - SL28 - SL14 [natural] Filter Roast",
+  handle: "sips-falls-organic-sl28-sl14-natural-filter-roast",
+  vendor: "ROCKET COFFEE",
+  product_type: "COFFEE",
+  tags: ["COFFEE", "ETHIOPIA", "FILTER", "SINGLE ORIGIN", "WASHED"],
+  subtext: "Strawberry · Pineapple · Gooseberry",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0259/2853/files/4C7E7656-35BF-4E98-BE73-D843CAE0B29F.webp?v=1762375306",
+      width: 2846,
+      height: 2846,
+    },
+  ],
+  options: [
+    { name: "WEIGHT", position: 1, values: ["250g"] },
+    { name: "GRIND", position: 2, values: ROCKET_GRINDS },
+  ],
+  variants: rocketGrindVariants(44828511961264, "25.00"),
+};
 
-export const TwoSipiFalls: Story = {
+const merlyLeon: Product = {
+  id: 8035585687728,
+  title: "Merly León - Yellow Caturra [washed] filter roast",
+  handle: "wilder-garcia-bravo-yellow-bourbon-washed-filter-roast-copy",
+  vendor: "ROCKET COFFEE",
+  product_type: "COFFEE",
+  tags: ["COFFEE", "FILTER", "NEW", "PERU", "SINGLE ORIGIN", "WASHED", "YELLOW CATURRA"],
+  subtext: "Peach · Orange · Maple syrup",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0259/2853/files/36A52ACA-1FE1-4D28-8771-1EB7C2127298.webp?v=1776053869",
+      width: 2846,
+      height: 2846,
+    },
+  ],
+  options: [
+    { name: "WEIGHT", position: 1, values: ["250g"] },
+    { name: "GRIND", position: 2, values: ROCKET_GRINDS },
+  ],
+  variants: rocketGrindVariants(45047563845808, "26.00"),
+};
+
+// ── Real: Ishinomaki Lab coffee tables (writing-page demo) ──────────
+
+const ishinomakiCenterTableHalf: Product = {
+  id: 10028504973609,
+  title: "CENTER TABLE HALF - Lounge Series",
+  handle: "center-table-half-lounge-series",
+  vendor: "Ishinomaki Lab",
+  product_type: "Furniture",
+  tags: [],
+  subtext: "Low center table · Yakushima cedar or chestnut",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01CENTER_TABLE-HALF_Chestnut01_black_KLS.webp?v=1771903780",
+      width: 1200,
+      height: 1200,
+    },
+  ],
+  options: [
+    {
+      name: "Wood",
+      position: 1,
+      values: ["栗 / natural", "栗 / soil", "屋久島地杉"],
+    },
+  ],
+  variants: [
+    {
+      id: 52740576772393,
+      title: "栗 / natural",
+      option1: "栗 / natural",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "154000",
+    },
+    {
+      id: 52740576805161,
+      title: "栗 / soil",
+      option1: "栗 / soil",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "154000",
+    },
+    {
+      id: 52740576837929,
+      title: "屋久島地杉",
+      option1: "屋久島地杉",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "93500",
+    },
+  ],
+};
+
+const ishinomakiCornerTable: Product = {
+  id: 10028499534121,
+  title: "CORNER TABLE - Kobo Lounge Series",
+  handle: "corner-table-kobo-lounge-series",
+  vendor: "Ishinomaki Lab",
+  product_type: "Furniture",
+  tags: [],
+  subtext: "Compact corner table · Yakushima cedar or chestnut",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01CORNER_TABLE_Chestnut01_black_KLS.webp?v=1771902441",
+      width: 1200,
+      height: 1200,
+    },
+  ],
+  options: [
+    {
+      name: "Wood",
+      position: 1,
+      values: ["栗 / natural", "栗 / soil", "屋久島地杉"],
+    },
+  ],
+  variants: [
+    {
+      id: 52740531061033,
+      title: "栗 / natural",
+      option1: "栗 / natural",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "132000",
+    },
+    {
+      id: 52740531847465,
+      title: "栗 / soil",
+      option1: "栗 / soil",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "132000",
+    },
+    {
+      id: 52740532633897,
+      title: "屋久島地杉",
+      option1: "屋久島地杉",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "82500",
+    },
+  ],
+};
+
+const ishinomakiSideTable: Product = {
+  id: 10011211104553,
+  title: "SIDE TABLE - the Originals",
+  handle: "side-table-the-originals",
+  vendor: "Ishinomaki Lab",
+  product_type: "Furniture",
+  tags: [],
+  subtext: "Noto hiba cedar · Linoleum top",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01SIDE_TABLE_Notohiba_Pebble_basic01_black_OG.webp?v=1770617705",
+      width: 1200,
+      height: 1200,
+    },
+  ],
+  options: [
+    { name: "Wood", position: 1, values: ["能登ヒバ"] },
+    { name: "Linolium", position: 2, values: ["Pebble"] },
+  ],
+  variants: [
+    {
+      id: 52622979334441,
+      title: "能登ヒバ / Pebble",
+      option1: "能登ヒバ",
+      option2: "Pebble",
+      option3: null,
+      available: true,
+      price: "39600",
+    },
+  ],
+};
+
+export const IshinomakiCoffeeTables: Story = {
+  render: () => (
+    <ProductCardsView
+      data={{
+        shopify_url: "https://ishinomaki-lab.org",
+        currency: "JPY",
+        title: "Ishinomaki Lab — coffee / center tables",
+        products: [
+          ishinomakiCenterTableHalf,
+          ishinomakiCornerTable,
+          ishinomakiSideTable,
+        ],
+      }}
+      app={null}
+    />
+  ),
+};
+
+export const FruityFilterRoasts: Story = {
   render: () => (
     <ProductCardsView
       data={{
         shopify_url: ROCKET_URL,
         currency: "NZD",
-        products: [
-          sipiProduct(7970648424624, 44828511961264),
-          sipiProduct(7970648424625, 44828511971264),
-        ],
+        products: [sipiFalls, merlyLeon],
       }}
       app={null}
     />
