@@ -6,14 +6,21 @@ import { registerRenderTools } from "./tools/render.js";
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Env {}
 
-function createServer(): McpServer {
+interface ServerContext {
+  /** Origin of the Worker request — used as the base URL for Static Assets. */
+  origin: string;
+}
+
+function createServer(context: ServerContext): McpServer {
   const server = new McpServer({
     name: "rocket-coffee",
     version: "1.0.0",
   });
 
   registerProductTools(server);
-  registerRenderTools(server);
+  registerRenderTools(server, {
+    getAssetsBaseUrl: () => context.origin,
+  });
   return server;
 }
 
@@ -56,7 +63,7 @@ export default {
     console.log(`[mcp] ${request.method} ${url.pathname} — ${methodLabel}`);
 
     try {
-      const server = createServer();
+      const server = createServer({ origin: url.origin });
       return await createMcpHandler(server)(request, env, ctx);
     } catch (err) {
       const message = err instanceof Error ? `${err.message}\n${err.stack}` : String(err);

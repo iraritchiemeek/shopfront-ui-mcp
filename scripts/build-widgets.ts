@@ -1,103 +1,136 @@
 /**
- * Build script for MCP Apps widgets.
+ * Build each widget with Vite.
  *
- * For each widget under `widgets/<name>/`:
- *   1. Compiles Tailwind via `@tailwindcss/cli` against `style.css`
- *   2. Bundles `main.ts` via esbuild (browser target, ESM, minified)
- *   3. Appends both to `index.html` as inline `<style>` and `<script>` tags
- *   4. Writes `src/widgets/generated/<name>.html`
- *
- * The server imports these `.html` files as text modules (via wrangler `rules`).
+ * Discovers widgets under widgets/<name>/main.tsx and invokes
+ * `vite build --config vite.widgets.config.ts` with WIDGET=<name> per widget.
+ * Builds run in parallel. `--watch` rebuilds on changes under widgets/.
  *
  * Run via `pnpm build:widgets`. Auto-runs from `predev` / `predeploy`.
  */
-import { execFile } from "node:child_process";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { exec } from "node:child_process";
+import { existsSync, rmSync } from "node:fs";
+import { readdir, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
-import { readdir, stat } from "node:fs/promises";
-import { build } from "esbuild";
-
-const execFileP = promisify(execFile);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const WIDGETS_DIR = join(ROOT, "widgets");
-const OUT_DIR = join(ROOT, "src", "widgets", "generated");
+const OUT_DIR = join(ROOT, "public", "ui-apps");
 
-/** Discover widget directories — any subdir of widgets/ that contains main.ts. */
 async function discoverWidgets(): Promise<string[]> {
   const entries = await readdir(WIDGETS_DIR);
   const names: string[] = [];
   for (const entry of entries) {
-    const mainPath = join(WIDGETS_DIR, entry, "main.ts");
+    const mainPath = join(WIDGETS_DIR, entry, "main.tsx");
     try {
       const s = await stat(mainPath);
       if (s.isFile()) names.push(entry);
     } catch {
-      // Not a widget directory
+      // not a widget
     }
   }
   return names.sort();
 }
 
-async function buildCss(widgetDir: string): Promise<string> {
-  const input = join(widgetDir, "style.css");
-  const output = join(widgetDir, ".build.css");
-  await execFileP(
-    "pnpm",
-    ["exec", "tailwindcss", "-i", input, "-o", output, "--minify"],
-    { cwd: ROOT },
-  );
-  const css = await readFile(output, "utf8");
-  await rm(output, { force: true });
-  return css;
-}
-
-async function buildJs(widgetDir: string): Promise<string> {
-  const result = await build({
-    entryPoints: [join(widgetDir, "main.ts")],
-    bundle: true,
-    format: "esm",
-    platform: "browser",
-    target: ["es2022"],
-    minify: true,
-    write: false,
-    logLevel: "error",
+function buildWidget(name: string): Promise<void> {
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+    return Promise.reject(new Error(`Invalid widget name "${name}"`));
+  }
+  return new Promise((resolvePromise, rejectPromise) => {
+    const child = exec("pnpm exec vite build --config vite.widgets.config.ts", {
+      cwd: ROOT,
+      env: { ...process.env, WIDGET: name },
+    });
+    let stderr = "";
+    child.stderr?.on("data", (d) => {
+      stderr += d;
+    });
+    child.on("close", (code) => {
+      if (code !== 0) {
+        console.error(`[build-widgets] ${name} failed:\n${stderr}`);
+        rejectPromise(new Error(`Build failed for ${name}`));
+      } else {
+        console.log(`[build-widgets] ✓ ${name}`);
+        resolvePromise();
+      }
+    });
   });
-  const file = result.outputFiles?.[0];
-  if (!file) throw new Error("esbuild produced no output");
-  return file.text;
 }
 
-async function buildWidget(name: string): Promise<void> {
-  const widgetDir = join(WIDGETS_DIR, name);
-  const template = await readFile(join(widgetDir, "index.html"), "utf8");
+async function buildAll(names: string[]): Promise<void> {
+  await Promise.all(names.map(buildWidget));
+}
 
-  const [css, js] = await Promise.all([buildCss(widgetDir), buildJs(widgetDir)]);
+async function watchMode(names: string[]): Promise<void> {
+  await buildAll(names);
+  console.log("[build-widgets] Initial build complete. Watching for changes…");
 
-  const html = template + `<style>${css}</style><script type="module">${js}</script>`;
+  const { default: chokidar } = await import("chokidar");
 
-  const outFile = join(OUT_DIR, `${name}.html`);
-  await writeFile(outFile, html, "utf8");
-  // eslint-disable-next-line no-console
-  console.log(`[build-widgets] ${name} → ${outFile} (${html.length} bytes)`);
+  let isBuilding = false;
+  let pending = false;
+
+  const rebuild = async (): Promise<void> => {
+    if (isBuilding) {
+      pending = true;
+      return;
+    }
+    isBuilding = true;
+    try {
+      await buildAll(names);
+    } catch (err) {
+      console.error("[build-widgets] rebuild failed:", err);
+    }
+    isBuilding = false;
+    if (pending) {
+      pending = false;
+      setTimeout(rebuild, 100);
+    }
+  };
+
+  const watcher = chokidar.watch(join(WIDGETS_DIR, "**/*.{ts,tsx,css}"), {
+    ignoreInitial: true,
+    awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 50 },
+  });
+  watcher.on("change", (path) => {
+    console.log(`[build-widgets] changed: ${path}`);
+    void rebuild();
+  });
+  watcher.on("add", (path) => {
+    console.log(`[build-widgets] added: ${path}`);
+    void rebuild();
+  });
+
+  const cleanup = (): void => {
+    void watcher.close();
+    process.exit(0);
+  };
+  process.on("SIGINT", cleanup);
+  process.on("SIGTERM", cleanup);
 }
 
 async function main(): Promise<void> {
-  await mkdir(OUT_DIR, { recursive: true });
+  const isWatch = process.argv.includes("--watch");
   const names = await discoverWidgets();
   if (names.length === 0) {
-    // eslint-disable-next-line no-console
     console.log("[build-widgets] No widgets found");
     return;
   }
-  for (const name of names) await buildWidget(name);
+  console.log(`[build-widgets] Discovered: ${names.join(", ")}`);
+
+  if (existsSync(OUT_DIR)) {
+    rmSync(OUT_DIR, { recursive: true });
+  }
+
+  if (isWatch) {
+    await watchMode(names);
+  } else {
+    await buildAll(names);
+  }
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });

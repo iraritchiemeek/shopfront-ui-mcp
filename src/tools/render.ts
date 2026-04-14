@@ -6,15 +6,13 @@
  */
 import {
   registerAppTool,
-  registerAppResource,
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { buildCartUrl } from "../shopify.js";
-import PRODUCT_CARDS_HTML from "../widgets/generated/product-cards.html";
-
-const PRODUCT_CARDS_URI = "ui://rocket-coffee/product-cards@v1";
+import { PRODUCT_CARDS_URI } from "../widgets/registry.js";
+import { buildAppStubHtml } from "../widgets/stub.js";
 
 const variantSchema = z.object({
   id: z.number().describe("Shopify variant ID"),
@@ -49,35 +47,57 @@ const productSchema = z.object({
   variants: z.array(variantSchema),
   images: z.array(imageSchema),
   options: z.array(optionSchema),
+  flavor_notes: z
+    .array(z.string())
+    .optional()
+    .describe(
+      "Tasting / flavor notes parsed from body_html (e.g. ['Rhubarb', 'Cherry', 'Red plum']). " +
+        "Extract from phrases like 'flavours of X, Y & Z' in body_html. Title-case each note. " +
+        "Omit if none are present.",
+    ),
 });
 
-export function registerRenderTools(server: McpServer): void {
-  registerAppResource(
-    server,
+export interface RenderToolsContext {
+  /** Base URL where Static Assets are served — used to reference widget JS/CSS. */
+  getAssetsBaseUrl: () => string;
+}
+
+export function registerRenderTools(
+  server: McpServer,
+  context: RenderToolsContext,
+): void {
+  server.registerResource(
     "product-cards",
     PRODUCT_CARDS_URI,
     {
+      mimeType: RESOURCE_MIME_TYPE,
       description: "Coffee product cards rendered inline in chat.",
-      _meta: {
-        ui: {
-          csp: { connectDomains: ["https://cdn.shopify.com"] },
-        },
-      },
     },
-    async () => ({
-      contents: [
-        {
-          uri: PRODUCT_CARDS_URI,
-          mimeType: RESOURCE_MIME_TYPE,
-          text: PRODUCT_CARDS_HTML,
-          _meta: {
-            ui: {
-              csp: { connectDomains: ["https://cdn.shopify.com"] },
+    async (uri) => {
+      const baseUrl = context.getAssetsBaseUrl();
+      const html = buildAppStubHtml("product-cards", baseUrl);
+      return {
+        contents: [
+          {
+            uri: uri.toString(),
+            mimeType: RESOURCE_MIME_TYPE,
+            text: html,
+            _meta: {
+              ui: {
+                csp: {
+                  connectDomains: ["https://cdn.shopify.com"],
+                  resourceDomains: [
+                    baseUrl,
+                    "https://fonts.googleapis.com",
+                    "https://fonts.gstatic.com",
+                  ],
+                },
+              },
             },
           },
-        },
-      ],
-    }),
+        ],
+      };
+    },
   );
 
   registerAppTool(
@@ -88,8 +108,10 @@ export function registerRenderTools(server: McpServer): void {
         "Render coffee products as interactive cards. Pass the curated product data from " +
         "get_products. The widget displays product images, tasting notes, prices, and variant " +
         "selectors. Users can pick quantities and generate a Shopify cart link directly in the " +
-        "widget. IMPORTANT: After calling this tool, do NOT repeat the product data — the widget " +
-        "displays it visually.",
+        "widget. For each product, parse the flavor notes from body_html (look for phrases like " +
+        "'flavours of X, Y & Z') and populate the flavor_notes array with title-cased items — " +
+        "the widget displays these in place of the raw description. IMPORTANT: After calling this " +
+        "tool, do NOT repeat the product data — the widget displays it visually.",
       inputSchema: {
         products: z.array(productSchema).describe("Array of Shopify products to display"),
         title: z.string().optional().describe("Optional heading above the cards"),

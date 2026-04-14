@@ -3,7 +3,8 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-03-01",
   "compatibility_flags": ["nodejs_compat"],
-  "rules": [
-    { "type": "Text", "globs": ["**/*.html"] }
-  ]
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  }
 }
