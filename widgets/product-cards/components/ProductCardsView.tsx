@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function ProductCardsView({ data, app }: Props) {
-  const { products, title, tokens } = data;
+  const { products, title, tokens, shopify_url } = data;
   const themeStyle = useMemo(
     () => (tokens ? (tokensToCssVars(tokens) as React.CSSProperties) : undefined),
     [tokens],
@@ -63,7 +63,7 @@ export function ProductCardsView({ data, app }: Props) {
     try {
       const result = (await app.callServerTool({
         name: "get_cart_url",
-        arguments: { items },
+        arguments: { shopify_url, items },
       })) as { structuredContent?: { cart_url?: string }; isError?: boolean };
 
       const url = result?.structuredContent?.cart_url;
@@ -79,7 +79,7 @@ export function ProductCardsView({ data, app }: Props) {
     } finally {
       setIsGenerating(false);
     }
-  }, [app, selections]);
+  }, [app, selections, shopify_url]);
 
   if (cartUrl) {
     return <CartLink url={cartUrl} />;

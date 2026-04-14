@@ -30,6 +30,7 @@ export type Product = {
 export type CardTemplate = "minimal" | "bold" | "editorial";
 
 export type Payload = {
+  shopify_url: string;
   products: Product[];
   title?: string;
   tokens?: BrandTokens;

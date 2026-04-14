@@ -161,7 +161,10 @@ const espressoBlend: Product = {
   ],
 };
 
+const ROCKET_URL = "https://rocketcoffee.co.nz";
+
 const basePayload: Payload = {
+  shopify_url: ROCKET_URL,
   title: "Filter coffees",
   products: [ethiopia, colombia, espressoBlend],
 };
@@ -174,14 +177,17 @@ export const Default: Story = {
 
 export const SingleProduct: Story = {
   render: () => (
-    <ProductCardsView data={{ products: [colombia] }} app={null} />
+    <ProductCardsView
+      data={{ shopify_url: ROCKET_URL, products: [colombia] }}
+      app={null}
+    />
   ),
 };
 
 export const NoFlavorNotes: Story = {
   render: () => (
     <ProductCardsView
-      data={{ products: [espressoBlend], title: "Espresso" }}
+      data={{ shopify_url: ROCKET_URL, products: [espressoBlend], title: "Espresso" }}
       app={null}
     />
   ),
@@ -189,12 +195,17 @@ export const NoFlavorNotes: Story = {
 
 export const ManyVariants: Story = {
   render: () => (
-    <ProductCardsView data={{ products: [ethiopia] }} app={null} />
+    <ProductCardsView
+      data={{ shopify_url: ROCKET_URL, products: [ethiopia] }}
+      app={null}
+    />
   ),
 };
 
 export const EmptyState: Story = {
-  render: () => <ProductCardsView data={{ products: [] }} app={null} />,
+  render: () => (
+    <ProductCardsView data={{ shopify_url: ROCKET_URL, products: [] }} app={null} />
+  ),
 };
 
 export const CartLinkState: Story = {

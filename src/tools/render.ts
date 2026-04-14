@@ -14,6 +14,18 @@ import { buildCartUrl } from "../shopify.js";
 import { PRODUCT_CARDS_URI } from "../widgets/registry.js";
 import { buildAppStubHtml } from "../widgets/stub.js";
 
+const brandTokensSchema = z.object({
+  primary: z.string(),
+  accent: z.string(),
+  bg: z.string(),
+  fg: z.string(),
+  muted: z.string(),
+  font: z.string(),
+  radius: z.string(),
+  logoUrl: z.string().optional(),
+  siteName: z.string().optional(),
+});
+
 const variantSchema = z.object({
   id: z.number().describe("Shopify variant ID"),
   title: z.string().describe("Variant title, e.g. '250g / Whole Bean'"),
@@ -105,25 +117,40 @@ export function registerRenderTools(
     "render_products",
     {
       description:
-        "Render coffee products as interactive cards. Pass the curated product data from " +
-        "get_products. The widget displays product images, tasting notes, prices, and variant " +
-        "selectors. Users can pick quantities and generate a Shopify cart link directly in the " +
-        "widget. For each product, parse the flavor notes from body_html (look for phrases like " +
-        "'flavours of X, Y & Z') and populate the flavor_notes array with title-cased items — " +
-        "the widget displays these in place of the raw description. IMPORTANT: After calling this " +
-        "tool, do NOT repeat the product data — the widget displays it visually.",
+        "Render products from a Shopify storefront as interactive, themed cards. Pass the " +
+        "curated product data from get_products and the brand tokens from analyze_site so the " +
+        "cards match the store's visual identity. The widget displays product images, tasting " +
+        "notes, prices, and variant selectors, and lets the user generate a cart link. For each " +
+        "product, parse flavour notes from body_html (phrases like 'flavours of X, Y & Z') and " +
+        "title-case them into flavor_notes — the widget prefers these over the raw description. " +
+        "Always pass shopify_url so the cart link resolves to the same store. " +
+        "IMPORTANT: After calling this tool, do NOT repeat the product data — the widget displays it visually.",
       inputSchema: {
+        shopify_url: z.string().describe("Shopify store URL the products belong to"),
         products: z.array(productSchema).describe("Array of Shopify products to display"),
         title: z.string().optional().describe("Optional heading above the cards"),
+        tokens: brandTokensSchema
+          .optional()
+          .describe("Brand tokens from analyze_site — themes the cards to the store"),
+        template: z
+          .enum(["minimal", "bold", "editorial"])
+          .optional()
+          .describe("Card template variant. Defaults to 'minimal'."),
       },
       _meta: {
         ui: { resourceUri: PRODUCT_CARDS_URI },
       },
     },
-    async ({ products, title }) => {
+    async ({ shopify_url, products, title, tokens, template }) => {
       return {
         content: [{ type: "text" as const, text: "Products rendered in widget." }],
-        structuredContent: { products, title } as unknown as Record<string, unknown>,
+        structuredContent: {
+          shopify_url,
+          products,
+          title,
+          tokens,
+          template: template ?? "minimal",
+        } as unknown as Record<string, unknown>,
       };
     },
   );
@@ -134,9 +161,11 @@ export function registerRenderTools(
     {
       title: "Get Cart URL",
       description:
-        "Generate a Shopify cart permalink from selected items. Called by the product-cards " +
-        "widget when the user confirms their selection — not intended for direct use by the model.",
+        "Generate a Shopify cart permalink from selected items for a given storefront. Called " +
+        "by the product-cards widget when the user confirms their selection — not intended for " +
+        "direct use by the model.",
       inputSchema: {
+        shopify_url: z.string().describe("Shopify store URL the items belong to"),
         items: z
           .array(
             z.object({
@@ -148,9 +177,9 @@ export function registerRenderTools(
       },
       _meta: { ui: { visibility: ["app"] } },
     },
-    async ({ items }) => {
+    async ({ shopify_url, items }) => {
       const cartUrl = buildCartUrl(
-        "https://rocketcoffee.co.nz",
+        shopify_url,
         items.map((item) => ({ variantId: item.variant_id, quantity: item.quantity })),
       );
       return {

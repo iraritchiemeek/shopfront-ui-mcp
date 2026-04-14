@@ -7,10 +7,14 @@ export function registerProductTools(server: McpServer): void {
     "get_products",
     {
       description:
-        "Fetch Rocket Coffee's full product catalog. Returns products with names, descriptions, " +
-        "tasting notes, prices, variants (sizes/grinds), images, and availability. The body_html " +
-        "field contains tasting notes and roast dates. Use product_type and tag to filter.",
+        "Fetch the full product catalogue from a Shopify storefront via its public " +
+        "/products.json endpoint. Returns products with names, descriptions, tasting notes, " +
+        "prices, variants, images, and availability. Use product_type and tag to filter. " +
+        "Works with any Shopify store — pass the storefront URL.",
       inputSchema: {
+        shopify_url: z
+          .string()
+          .describe("Shopify store URL, e.g. 'https://rocketcoffee.co.nz' or 'allpress.co.nz'"),
         product_type: z
           .string()
           .optional()
@@ -21,8 +25,8 @@ export function registerProductTools(server: McpServer): void {
           .describe("Filter by tag, e.g. FILTER, ESPRESSO, ETHIOPIA, SINGLE ORIGIN"),
       },
     },
-    async ({ product_type, tag }) => {
-      const products = await fetchProducts("https://rocketcoffee.co.nz", { product_type, tag });
+    async ({ shopify_url, product_type, tag }) => {
+      const products = await fetchProducts(shopify_url, { product_type, tag });
       return {
         content: [{ type: "text" as const, text: JSON.stringify(products, null, 2) }],
       };
