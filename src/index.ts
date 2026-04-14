@@ -10,6 +10,23 @@ import { registerSearchTools } from "./tools/search.js";
 export interface Env {
   ASSETS: Fetcher;
   LOADER: WorkerLoader;
+  MCP_LIMITER: RateLimit;
+  ABUSE_KV: KVNamespace;
+}
+
+const DAILY_CEILING = 20_000;
+
+async function checkDailyCeiling(
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<boolean> {
+  const key = `count:${new Date().toISOString().slice(0, 10)}`;
+  const current = parseInt((await env.ABUSE_KV.get(key)) ?? "0", 10);
+  if (current >= DAILY_CEILING) return false;
+  ctx.waitUntil(
+    env.ABUSE_KV.put(key, String(current + 1), { expirationTtl: 60 * 60 * 48 }),
+  );
+  return true;
 }
 
 interface ServerContext {
@@ -55,35 +72,20 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    // Log JSON-RPC method for wrangler tail debugging
-    let methodLabel = request.method;
-    try {
-      const clone = request.clone();
-      const body = await clone.text();
-      if (body) {
-        try {
-          const parsed = JSON.parse(body);
-          if (parsed && typeof parsed === "object") {
-            if (Array.isArray(parsed)) {
-              methodLabel = `batch: ${parsed.map((p: { method?: string }) => p?.method).join(", ")}`;
-            } else if (parsed.method) {
-              methodLabel = parsed.method;
-              if (parsed.method === "resources/read" && parsed.params?.uri) {
-                methodLabel += ` uri=${parsed.params.uri}`;
-              }
-              if (parsed.method === "tools/call" && parsed.params?.name) {
-                methodLabel += ` name=${parsed.params.name}`;
-              }
-            }
-          }
-        } catch {
-          /* not JSON */
-        }
-      }
-    } catch {
-      /* clone failed */
+    const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+    const { success } = await env.MCP_LIMITER.limit({ key: ip });
+    if (!success) {
+      return new Response("Rate limit exceeded. Try again in a minute.", {
+        status: 429,
+        headers: { "retry-after": "60" },
+      });
     }
-    console.log(`[mcp] ${request.method} ${url.pathname} — ${methodLabel}`);
+
+    if (!(await checkDailyCeiling(env, ctx))) {
+      return new Response("Daily request ceiling reached.", { status: 429 });
+    }
+
+    console.log(`[mcp] ${request.method} ${url.pathname}`);
 
     try {
       const server = await createServer({ origin: url.origin, env });
