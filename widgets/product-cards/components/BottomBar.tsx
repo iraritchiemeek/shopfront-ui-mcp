@@ -34,14 +34,14 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
 
               <div className="ml-4 flex min-w-0 flex-1 flex-col">
                 <div>
-                  <div className="flex justify-between gap-4 text-base font-medium text-brand dark:text-white">
+                  <div className="flex justify-between gap-4 text-base font-semibold tracking-tight text-brand dark:text-white">
                     <h3 className="truncate">{item.title}</h3>
                     <p className="ml-4 shrink-0 tabular-nums">
                       {formatPrice(item.unitPrice * item.quantity)}
                     </p>
                   </div>
                   {showVariant && (
-                    <p className="mt-1 text-sm text-stone-500 dark:text-slate-400">
+                    <p className="mt-1 text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-slate-400">
                       {item.variantTitle}
                     </p>
                   )}
@@ -55,7 +55,7 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
                       onChange={(e) =>
                         onChangeQuantity(item.productId, parseInt(e.target.value, 10))
                       }
-                      className="col-start-1 row-start-1 appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-brand outline-1 -outline-offset-1 outline-stone-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:*:bg-slate-800 dark:focus-visible:outline-brand"
+                      className="col-start-1 row-start-1 cursor-pointer appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-sm font-medium text-brand outline-1 -outline-offset-1 outline-stone-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand dark:bg-white/5 dark:text-white dark:outline-white/10 dark:*:bg-slate-800 dark:focus-visible:outline-brand"
                     >
                       {Array.from(
                         { length: Math.max(10, item.quantity) },
@@ -83,7 +83,7 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
                   <button
                     type="button"
                     onClick={() => onChangeQuantity(item.productId, 0)}
-                    className="cursor-pointer bg-transparent p-0 font-medium text-brand transition-colors hover:text-red-600 dark:text-white dark:hover:text-red-400"
+                    className="cursor-pointer bg-transparent p-0 text-sm font-medium text-stone-500 transition-colors hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
                   >
                     Remove
                   </button>
@@ -95,13 +95,13 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
       </ul>
 
       <div className="flex items-center justify-between gap-4 border-t border-stone-200 px-5 py-4 dark:border-slate-700">
-        <span className="text-lg font-bold text-brand dark:text-white">
+        <span className="text-lg font-semibold tracking-tight text-brand dark:text-white">
           Total · {formatPrice(totalPrice)} NZD
         </span>
         <button
           type="button"
           onClick={onCheckout}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-bold text-white leading-none transition-colors hover:bg-brand-hover"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-semibold text-white leading-none transition-colors hover:bg-brand-hover"
         >
           <span>Checkout</span>
           <svg

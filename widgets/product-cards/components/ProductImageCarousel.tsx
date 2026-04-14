@@ -94,7 +94,7 @@ export function ProductImageCarousel({ images, alt }: Props) {
               onClick={() => scrollToIndex(i)}
               aria-label={`View image ${i + 1}`}
               aria-current={activeIndex === i}
-              className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-stone-100 p-1 transition-colors dark:bg-slate-700 ${
+              className={`flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-md border bg-stone-100 p-1 transition-colors dark:bg-slate-700 ${
                 activeIndex === i
                   ? "border-brand dark:border-white"
                   : "border-stone-200 hover:border-stone-400 dark:border-slate-600 dark:hover:border-slate-400"

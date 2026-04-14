@@ -136,22 +136,24 @@ export function ProductCard({
         </div>
 
         <div className="flex flex-col @xl:col-span-7">
-          <h2 className="text-xl font-bold text-brand @xl:pr-6">{active.title}</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-brand leading-tight @xl:pr-6">
+            {active.title}
+          </h2>
 
-          <p className="mt-3 text-xl text-brand tabular-nums">
+          <p className="mt-2 text-lg font-semibold text-brand tabular-nums">
             {formatPrice(selectedVariant.price)}
           </p>
 
           {product.subtext && (
-            <p className="mt-3 text-sm text-stone-600 dark:text-slate-400">{product.subtext}</p>
+            <p className="mt-3 text-sm/6 text-stone-600 dark:text-slate-400">{product.subtext}</p>
           )}
 
           {showSwatches && (
             <div className="mt-6">
-              <span className="block text-sm/6 font-medium text-brand dark:text-white">
+              <span className="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-slate-400">
                 Colour
                 {active.swatch && (
-                  <span className="ml-2 font-normal text-stone-500 dark:text-slate-400">
+                  <span className="ml-2 font-medium normal-case tracking-normal text-brand dark:text-white">
                     {active.swatch.label}
                   </span>
                 )}
@@ -194,7 +196,7 @@ export function ProductCard({
                   <div key={opt.name} className="min-w-[8rem] flex-1">
                     <label
                       htmlFor={id}
-                      className="block text-sm/6 font-medium text-brand dark:text-white"
+                      className="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-slate-400"
                     >
                       {opt.name}
                     </label>
@@ -203,7 +205,7 @@ export function ProductCard({
                         id={id}
                         value={selectedVal}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
-                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-brand outline-1 -outline-offset-1 outline-stone-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:*:bg-slate-800 dark:focus-visible:outline-brand"
+                        className="col-start-1 row-start-1 w-full cursor-pointer appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-sm font-medium text-brand outline-1 -outline-offset-1 outline-stone-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand dark:bg-white/5 dark:text-white dark:outline-white/10 dark:*:bg-slate-800 dark:focus-visible:outline-brand"
                       >
                         {opt.values.map((val) => (
                           <option key={val} value={val}>
@@ -234,7 +236,7 @@ export function ProductCard({
             <button
               type="button"
               onClick={handleAdd}
-              className="relative flex w-full items-center justify-center rounded-md bg-brand px-8 py-3 text-base font-medium text-white transition-colors hover:bg-brand-hover focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:outline-none"
+              className="relative flex w-full cursor-pointer items-center justify-center rounded-md bg-brand px-8 py-3 text-base font-semibold text-white transition-colors hover:bg-brand-hover focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:outline-none"
             >
               <span
                 className={`transition-opacity duration-200 ${justAdded ? "opacity-0" : "opacity-100"}`}
