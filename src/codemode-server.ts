@@ -57,7 +57,7 @@ function unwrapMcpResult(result: unknown): unknown {
   return result;
 }
 
-const CODE_DESCRIPTION = `Execute JavaScript to browse a Shopify storefront, analyse its brand styling, and pick products. You have a full programming environment — use it to chain calls, filter, and compute in one round-trip.
+const CODE_DESCRIPTION = `Execute JavaScript to browse a Shopify storefront and pick products. You have a full programming environment — use it to chain calls, filter, and compute in one round-trip.
 
 ## Available methods
 
@@ -68,31 +68,78 @@ const CODE_DESCRIPTION = `Execute JavaScript to browse a Shopify storefront, ana
 Write an async arrow function in JavaScript that returns a structured object.
 - Do NOT use TypeScript syntax — no type annotations, interfaces, or generics.
 - Do NOT define named functions then call them — write the arrow function body directly.
+- EXCEPTION: define the \`trim\` helper (below) inline — it keeps your return value small.
+
+## Trim helper — use in every return
+
+Raw Shopify products are heavy (long \`body_html\`, SKUs, timestamps, per-variant grams, multiple images). The object you return is read verbatim by the model as a tool result — untrimmed products waste tokens. Always \`.map(trim)\` before returning. This cuts size 10–20× with no rendering loss.
+
+\`\`\`js
+const trim = (p) => ({
+  id: p.id, title: p.title, handle: p.handle, vendor: p.vendor,
+  product_type: p.product_type, tags: p.tags,
+  body_html: (p.body_html || "").replace(/<[^>]+>/g, " ").replace(/\\s+/g, " ").trim().slice(0, 280),
+  variants: p.variants.map(v => ({
+    id: v.id, title: v.title,
+    option1: v.option1, option2: v.option2, option3: v.option3,
+    available: v.available, price: v.price,
+  })),
+  images: p.images.slice(0, 1).map(i => ({ src: i.src, width: i.width, height: i.height })),
+  options: p.options,
+});
+\`\`\`
 
 ## Typical flow
 
-The end goal is usually to call \`render_products\` (a separate, direct tool — not available here) with curated products plus brand tokens. Inside \`code\`, gather the inputs:
+The end goal is usually to call \`render_products\` (a separate, direct tool — not available here) with curated products. Inside \`code\`, pick the right method for the user's intent, then trim every product before returning.
+
+### Intent: popular / featured / bestselling / curated
+
+List collections, find one whose handle or title matches the intent, then fetch its products (order within a collection reflects whatever the merchant configured):
 
 \`\`\`js
 async () => {
-  const [tokens, products] = await Promise.all([
-    codemode.analyze_site({ shopify_url: "https://example.com" }),
-    codemode.get_products({ shopify_url: "https://example.com", product_type: "COFFEE" })
-  ]);
-  // Pick the specific product the user asked about and parse flavour notes.
-  const product = products.find(p => p.title.toLowerCase().includes("rocket fuel"));
-  return { tokens, products: product ? [product] : products.slice(0, 3) };
+  const url = "https://example.com";
+  const collections = await codemode.get_collections({ shopify_url: url });
+  const picked = collections.find(c => /best|popular|top|featured|staff|frontpage|home/i.test(c.handle + " " + c.title))
+    ?? collections.find(c => c.products_count > 0);
+  const products = await codemode.get_products_in_collection({ shopify_url: url, handle: picked.handle });
+  return { products: products.slice(0, 5).map(trim) };
 }
 \`\`\`
 
-Then the model calls \`render_products\` directly with \`{ shopify_url, products, tokens, template: "minimal" }\`.
+### Intent: keyword search (user named a specific product, brand, or attribute)
 
-## Efficiency rules
+Use predictive search first; fall back to browsing the catalogue if results are thin. \`search_products\` returns a LEAN shape (\`body\` not \`body_html\`, no \`options\`, variants lack \`option1/option2/option3\`) that \`render_products\` will reject — always re-fetch via \`get_products\` and filter by handle before trimming:
 
-1. **One-shot**: fetch everything you need inside \`code\`, return the final shape.
-2. **Parallel fetches**: \`Promise.all\` for independent calls (site analysis + product list).
-3. **Filter in code**: narrow to the product the user asked about before returning.
-4. **Tokens are small** — always include them so \`render_products\` can theme the cards.
+\`\`\`js
+async () => {
+  const url = "https://example.com";
+  const q = "<user's keyword>";
+  const hits = await codemode.search_products({ shopify_url: url, q });
+  const handles = new Set(hits.map(h => h.handle));
+  let full = (await codemode.get_products({ shopify_url: url })).filter(p => handles.has(p.handle));
+  if (full.length === 0) {
+    const re = new RegExp(q, "i");
+    full = (await codemode.get_products({ shopify_url: url }))
+      .filter(p => re.test(p.title + " " + p.body_html + " " + p.tags.join(" ")));
+  }
+  return { products: full.slice(0, 5).map(trim) };
+}
+\`\`\`
+
+### Intent: browse & filter by category or tag
+
+Use the catalogue with \`product_type\` or \`tag\` filters. These are case-insensitive exact matches — use the exact strings you see on the store (discover them via \`get_collections\` or a first unfiltered \`get_products\` call):
+
+\`\`\`js
+async () => {
+  const products = await codemode.get_products({ shopify_url: "https://example.com", product_type: "<EXACT_TYPE>" });
+  return { products: products.slice(0, 5).map(trim) };
+}
+\`\`\`
+
+Then the model calls \`render_products\` directly with \`{ shopify_url, products, template: "minimal" }\`.
 
 {{example}}`;
 
