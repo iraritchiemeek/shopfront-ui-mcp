@@ -125,9 +125,9 @@ export function ProductCard({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
-      <div className="grid grid-cols-1 gap-x-6 gap-y-6 p-4 sm:grid-cols-12 sm:gap-y-8 sm:p-6 lg:gap-x-8">
-        <div className="sm:col-span-5">
+    <div className="@container overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-6 p-4 @xl:grid-cols-12 @xl:gap-y-8 @xl:p-6 @2xl:gap-x-8">
+        <div className="@xl:col-span-5">
           <ProductImageCarousel
             key={active.id}
             images={active.images}
@@ -135,8 +135,8 @@ export function ProductCard({
           />
         </div>
 
-        <div className="flex flex-col sm:col-span-7">
-          <h2 className="text-xl font-bold text-brand sm:pr-6">{active.title}</h2>
+        <div className="flex flex-col @xl:col-span-7">
+          <h2 className="text-xl font-bold text-brand @xl:pr-6">{active.title}</h2>
 
           <p className="mt-3 text-xl text-brand tabular-nums">
             {formatPrice(selectedVariant.price)}
@@ -149,18 +149,14 @@ export function ProductCard({
           {showSwatches && (
             <div className="mt-6">
               <span className="block text-sm/6 font-medium text-brand dark:text-white">
-                {active.swatch ? (
-                  <>
-                    {product.options[0]?.name ?? "Finish"}
-                    <span className="ml-2 font-normal text-stone-500 dark:text-slate-400">
-                      {active.swatch.label}
-                    </span>
-                  </>
-                ) : (
-                  "Finish"
+                Colour
+                {active.swatch && (
+                  <span className="ml-2 font-normal text-stone-500 dark:text-slate-400">
+                    {active.swatch.label}
+                  </span>
                 )}
               </span>
-              <fieldset aria-label="Finish" className="mt-2">
+              <fieldset aria-label="Colour" className="mt-2">
                 <div className="flex flex-wrap items-center gap-3">
                   {views.map((v, i) => {
                     if (!v.swatch) return null;
@@ -190,12 +186,12 @@ export function ProductCard({
           )}
 
           {active.variants.length > 1 && (
-            <div className="mt-6 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-3">
               {active.options.map((opt, idx) => {
                 const id = `option-${active.id}-${idx}`;
                 const selectedVal = optionValues[idx] ?? "";
                 return (
-                  <div key={opt.name} className="w-full sm:w-48">
+                  <div key={opt.name} className="min-w-[8rem] flex-1">
                     <label
                       htmlFor={id}
                       className="block text-sm/6 font-medium text-brand dark:text-white"

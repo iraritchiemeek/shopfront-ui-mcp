@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { McpThemeDecorator } from "../../.storybook/decorator.js";
 import { ProductCardsView } from "./components/ProductCardsView.js";
-import type { Payload, Product } from "./types.js";
+import type { Payload, Product, Variant } from "./types.js";
 
 const meta: Meta = {
   title: "MCP Apps/Product Cards",
