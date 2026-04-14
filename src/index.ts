@@ -2,13 +2,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DynamicWorkerExecutor } from "@cloudflare/codemode";
 import { createMcpHandler } from "agents/mcp";
 import { codeMcpServer } from "./codemode-server.js";
-import { registerAnalyzeTools } from "./tools/analyze.js";
+import { registerCollectionTools } from "./tools/collections.js";
 import { registerProductTools } from "./tools/products.js";
 import { registerRenderTools } from "./tools/render.js";
+import { registerSearchTools } from "./tools/search.js";
 
 export interface Env {
   ASSETS: Fetcher;
-  BROWSER: Fetcher;
   LOADER: WorkerLoader;
 }
 
@@ -19,11 +19,11 @@ interface ServerContext {
 }
 
 /**
- * Build a fresh McpServer per request. Data tools (analyze_site, get_products)
- * register on baseServer and get collapsed into a single `code` tool by
- * codeMcpServer. Render tools (render_products, get_cart_url) register on the
- * returned wrapper so they stay direct tool calls — required for MCP Apps
- * widget rendering and for the widget itself to call back into the server.
+ * Build a fresh McpServer per request. The data tool (get_products) registers
+ * on baseServer and gets collapsed into a single `code` tool by codeMcpServer.
+ * Render tools (render_products, get_cart_url) register on the returned
+ * wrapper so they stay direct tool calls — required for MCP Apps widget
+ * rendering and for the widget itself to call back into the server.
  */
 async function createServer(context: ServerContext): Promise<McpServer> {
   const baseServer = new McpServer({
@@ -31,8 +31,9 @@ async function createServer(context: ServerContext): Promise<McpServer> {
     version: "1.0.0",
   });
 
-  registerAnalyzeTools(baseServer, { browser: context.env.BROWSER });
   registerProductTools(baseServer);
+  registerCollectionTools(baseServer);
+  registerSearchTools(baseServer);
 
   const executor = new DynamicWorkerExecutor({
     loader: context.env.LOADER,

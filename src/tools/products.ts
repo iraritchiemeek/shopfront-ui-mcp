@@ -7,22 +7,26 @@ export function registerProductTools(server: McpServer): void {
     "get_products",
     {
       description:
-        "Fetch the full product catalogue from a Shopify storefront via its public " +
-        "/products.json endpoint. Returns products with names, descriptions, tasting notes, " +
-        "prices, variants, images, and availability. Use product_type and tag to filter. " +
-        "Works with any Shopify store — pass the storefront URL.",
+        "Fetch the full product catalogue from a Shopify storefront via its public /products.json endpoint. " +
+        "Use this when the user asks to browse everything, wants to filter by product_type or tag (case-insensitive exact match), or when you need to do semantic filtering on descriptions/tags that other tools can't express. " +
+        "For 'popular' or 'featured' intents, prefer get_collections first. For keyword search on a large catalogue, prefer search_products. " +
+        "Returns: Array<{ id, title, handle, body_html, vendor, product_type, tags, variants: [{ id, title, price, available, ... }], images, options }>. Works with any Shopify store.",
       inputSchema: {
         shopify_url: z
           .string()
-          .describe("Shopify store URL, e.g. 'https://rocketcoffee.co.nz' or 'allpress.co.nz'"),
+          .describe("Shopify store URL, e.g. 'https://example.com' or 'example.myshopify.com'"),
         product_type: z
           .string()
           .optional()
-          .describe("Filter by product type, e.g. COFFEE, EQUIPMENT, CLOTHING"),
+          .describe(
+            "Filter by product type, case-insensitive exact match. Stores set their own types — inspect a first unfiltered result or get_collections to discover the values used on this store.",
+          ),
         tag: z
           .string()
           .optional()
-          .describe("Filter by tag, e.g. FILTER, ESPRESSO, ETHIOPIA, SINGLE ORIGIN"),
+          .describe(
+            "Filter by tag, case-insensitive exact match. Stores set their own tags — discover values from an unfiltered result.",
+          ),
       },
     },
     async ({ shopify_url, product_type, tag }) => {

@@ -68,3 +68,83 @@ export interface ShopifyOption {
 export interface ShopifyProductsResponse {
   products: ShopifyProduct[];
 }
+
+export interface ShopifyCollectionImage {
+  src: string;
+  alt: string | null;
+  width: number;
+  height: number;
+  created_at: string;
+}
+
+export interface ShopifyCollection {
+  id: number;
+  handle: string;
+  title: string;
+  description: string;
+  published_at: string;
+  updated_at: string;
+  image: ShopifyCollectionImage | null;
+  products_count: number;
+}
+
+export interface ShopifyCollectionsResponse {
+  collections: ShopifyCollection[];
+}
+
+/**
+ * Product shape returned by `/search/suggest.json`. Leaner than `/products.json`:
+ * no `options`, no per-variant `sku` / `grams` / timestamps, and URLs are store-relative.
+ */
+export interface ShopifyPredictiveProduct {
+  id: number;
+  handle: string;
+  title: string;
+  body: string;
+  vendor: string;
+  type: string;
+  tags: string[];
+  url: string;
+  image: string | null;
+  price: string;
+  price_min: string;
+  price_max: string;
+  compare_at_price_min: string;
+  compare_at_price_max: string;
+  available: boolean;
+  featured_image: {
+    url: string | null;
+    alt: string | null;
+    width: number | null;
+    height: number | null;
+    aspect_ratio: number | null;
+  };
+  variants: Array<{
+    id: number;
+    title: string;
+    url: string;
+    price: string;
+    compare_at_price: string | null;
+    available: boolean;
+    image: string | null;
+    featured_image: {
+      url: string | null;
+      alt: string | null;
+      width: number | null;
+      height: number | null;
+      aspect_ratio: number | null;
+    };
+  }>;
+}
+
+export interface ShopifyPredictiveSearchResponse {
+  resources: {
+    results: {
+      products?: ShopifyPredictiveProduct[];
+      collections?: unknown[];
+      pages?: unknown[];
+      articles?: unknown[];
+      queries?: unknown[];
+    };
+  };
+}

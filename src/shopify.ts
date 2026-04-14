@@ -1,4 +1,24 @@
-import type { ShopifyProduct, ShopifyProductsResponse } from "./types/shopify.js";
+import type {
+  ShopifyCollection,
+  ShopifyCollectionsResponse,
+  ShopifyPredictiveProduct,
+  ShopifyPredictiveSearchResponse,
+  ShopifyProduct,
+  ShopifyProductsResponse,
+} from "./types/shopify.js";
+
+const SHOPIFY_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
+  Accept: "application/json",
+} as const;
+
+async function fetchShopifyJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, { headers: SHOPIFY_HEADERS });
+  if (!res.ok) {
+    throw new Error(`Shopify returned ${res.status}: ${await res.text()}`);
+  }
+  return (await res.json()) as T;
+}
 
 export function normaliseStoreOrigin(input: string): string {
   const raw = input.trim();
@@ -19,16 +39,7 @@ export async function fetchProducts(
   },
 ): Promise<ShopifyProduct[]> {
   const origin = normaliseStoreOrigin(storeUrl);
-  const res = await fetch(`${origin}/products.json`, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
-      Accept: "application/json",
-    },
-  });
-  if (!res.ok) {
-    throw new Error(`Shopify returned ${res.status}: ${await res.text()}`);
-  }
-  const data = (await res.json()) as ShopifyProductsResponse;
+  const data = await fetchShopifyJson<ShopifyProductsResponse>(`${origin}/products.json`);
   let products = data.products;
 
   if (filters?.product_type) {
@@ -42,6 +53,46 @@ export async function fetchProducts(
   }
 
   return products;
+}
+
+export async function fetchCollections(storeUrl: string): Promise<ShopifyCollection[]> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  const data = await fetchShopifyJson<ShopifyCollectionsResponse>(
+    `${origin}/collections.json?limit=250`,
+  );
+  return data.collections;
+}
+
+export async function fetchCollectionProducts(
+  storeUrl: string,
+  handle: string,
+): Promise<ShopifyProduct[]> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  const encodedHandle = encodeURIComponent(handle);
+  const data = await fetchShopifyJson<ShopifyProductsResponse>(
+    `${origin}/collections/${encodedHandle}/products.json?limit=250`,
+  );
+  return data.products;
+}
+
+/**
+ * Shopify's predictive search endpoint. Capped by Shopify at 10 results per
+ * resource type. Returns the flattened `products` array (may be empty on miss).
+ */
+export async function searchProducts(
+  storeUrl: string,
+  query: string,
+): Promise<ShopifyPredictiveProduct[]> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  const params = new URLSearchParams({
+    q: query,
+    "resources[type]": "product",
+    "resources[options][unavailable_products]": "hide",
+  });
+  const data = await fetchShopifyJson<ShopifyPredictiveSearchResponse>(
+    `${origin}/search/suggest.json?${params.toString()}`,
+  );
+  return data.resources.results.products ?? [];
 }
 
 export function buildCartUrl(

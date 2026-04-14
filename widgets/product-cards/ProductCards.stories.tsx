@@ -14,6 +14,9 @@ type Story = StoryObj<{}>;
 
 // ── Mock data ───────────────────────────────────────────────────────
 
+const MOCK_IMAGE_SRC =
+  "https://rocketcoffee.co.nz/cdn/shop/files/2B466F62-D866-4428-A38E-6CFE11A25F75.webp?v=1773617655&width=700";
+
 const ethiopia: Product = {
   id: 1,
   title: "Ethiopia Guji",
@@ -24,13 +27,7 @@ const ethiopia: Product = {
   product_type: "COFFEE",
   tags: ["FILTER", "ETHIOPIA", "SINGLE ORIGIN"],
   flavor_notes: ["Rhubarb", "Cherry", "Red plum"],
-  images: [
-    {
-      src: "https://cdn.shopify.com/s/files/1/0000/0000/products/ethiopia.jpg",
-      width: 800,
-      height: 800,
-    },
-  ],
+  images: [{ src: MOCK_IMAGE_SRC, width: 800, height: 800 }],
   options: [
     { name: "WEIGHT", position: 1, values: ["250g", "1kg"] },
     { name: "GRIND", position: 2, values: ["Whole Bean", "Espresso", "Filter"] },
@@ -102,13 +99,7 @@ const colombia: Product = {
   product_type: "COFFEE",
   tags: ["FILTER", "COLOMBIA", "SINGLE ORIGIN"],
   flavor_notes: ["Passionfruit", "Mango", "Lychee"],
-  images: [
-    {
-      src: "https://cdn.shopify.com/s/files/1/0000/0000/products/colombia.jpg",
-      width: 800,
-      height: 800,
-    },
-  ],
+  images: [{ src: MOCK_IMAGE_SRC, width: 800, height: 800 }],
   options: [{ name: "WEIGHT", position: 1, values: ["150g"] }],
   variants: [
     {
@@ -131,13 +122,7 @@ const espressoBlend: Product = {
   vendor: "Rocket Coffee",
   product_type: "COFFEE",
   tags: ["ESPRESSO", "BLEND"],
-  images: [
-    {
-      src: "https://cdn.shopify.com/s/files/1/0000/0000/products/rocket.jpg",
-      width: 800,
-      height: 800,
-    },
-  ],
+  images: [{ src: MOCK_IMAGE_SRC, width: 800, height: 800 }],
   options: [{ name: "WEIGHT", position: 1, values: ["250g", "1kg"] }],
   variants: [
     {
@@ -202,81 +187,4 @@ export const EmptyState: Story = {
 
 export const CartLinkState: Story = {
   render: () => <CartLink url="https://rocketcoffee.co.nz/cart/101:1,201:2" />,
-};
-
-// ── Tokenised stories (simulating analyze_site output) ─────────────
-
-const rocketTokens = {
-  primary: "rgb(255, 66, 52)",
-  accent: "rgb(255, 66, 52)",
-  bg: "#ffffff",
-  fg: "#111111",
-  muted: "#6b6b6b",
-  font: "Roboto",
-  radius: "0.5rem",
-  siteName: "Rocket Coffee",
-};
-
-const allpressTokens = {
-  primary: "#000000",
-  accent: "#c41e3a",
-  bg: "#f5f2ea",
-  fg: "#1a1a1a",
-  muted: "#6b6b6b",
-  font: '"Suisse Intl", Helvetica, sans-serif',
-  radius: "0px",
-  siteName: "Allpress Espresso",
-};
-
-const indieTokens = {
-  primary: "#2f5d50",
-  accent: "#d4a373",
-  bg: "#faedcd",
-  fg: "#1d3557",
-  muted: "#8d7d6a",
-  font: "Georgia, serif",
-  radius: "1.25rem",
-  siteName: "Forest & Field",
-};
-
-export const ThemedRocket: Story = {
-  render: () => (
-    <ProductCardsView
-      data={{
-        shopify_url: ROCKET_URL,
-        title: "Filter coffees",
-        products: [ethiopia, colombia],
-        tokens: rocketTokens,
-      }}
-      app={null}
-    />
-  ),
-};
-
-export const ThemedAllpress: Story = {
-  render: () => (
-    <ProductCardsView
-      data={{
-        shopify_url: "https://allpress.co.nz",
-        title: "Signature blends",
-        products: [ethiopia, colombia],
-        tokens: allpressTokens,
-      }}
-      app={null}
-    />
-  ),
-};
-
-export const ThemedIndie: Story = {
-  render: () => (
-    <ProductCardsView
-      data={{
-        shopify_url: "https://forestandfield.example",
-        title: "This month's beans",
-        products: [ethiopia, colombia],
-        tokens: indieTokens,
-      }}
-      app={null}
-    />
-  ),
 };

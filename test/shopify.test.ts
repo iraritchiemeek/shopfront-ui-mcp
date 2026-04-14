@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchProducts, buildCartUrl } from "../src/shopify.js";
+import {
+  fetchProducts,
+  buildCartUrl,
+  fetchCollections,
+  fetchCollectionProducts,
+  searchProducts,
+} from "../src/shopify.js";
 
 const mockFetch = vi.fn<typeof fetch>();
 
@@ -172,6 +178,100 @@ describe("fetchProducts", () => {
     );
 
     await expect(fetchProducts(ROCKET)).rejects.toThrow("Shopify returned 404");
+  });
+});
+
+describe("fetchCollections", () => {
+  it("fetches collections from the provided store", async () => {
+    const collections = [
+      {
+        id: 1,
+        title: "Bestsellers",
+        handle: "bestsellers",
+        description: "",
+        published_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+        image: null,
+        products_count: 10,
+      },
+    ];
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ collections })),
+    );
+
+    const result = await fetchCollections(ROCKET);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.handle).toBe("bestsellers");
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://rocketcoffee.co.nz/collections.json?limit=250",
+      expect.anything(),
+    );
+  });
+
+  it("throws on non-OK response", async () => {
+    mockFetch.mockResolvedValueOnce(new Response("boom", { status: 500 }));
+    await expect(fetchCollections(ROCKET)).rejects.toThrow("Shopify returned 500");
+  });
+});
+
+describe("fetchCollectionProducts", () => {
+  it("fetches products for a collection handle", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ products: sampleProducts })),
+    );
+
+    const result = await fetchCollectionProducts(ROCKET, "coffee");
+    expect(result).toHaveLength(2);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://rocketcoffee.co.nz/collections/coffee/products.json?limit=250",
+      expect.anything(),
+    );
+  });
+
+  it("url-encodes handles with unusual characters", async () => {
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ products: [] })));
+    await fetchCollectionProducts(ROCKET, "new arrivals");
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://rocketcoffee.co.nz/collections/new%20arrivals/products.json?limit=250",
+      expect.anything(),
+    );
+  });
+});
+
+describe("searchProducts", () => {
+  it("returns the flattened predictive products array", async () => {
+    const products = [
+      { id: 1, handle: "espresso", title: "ESPRESSO BLEND", tags: [], variants: [] },
+    ];
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ resources: { results: { products } } })),
+    );
+
+    const result = await searchProducts(ROCKET, "espresso");
+    expect(result).toHaveLength(1);
+    expect(result[0]!.title).toBe("ESPRESSO BLEND");
+
+    const calledUrl = mockFetch.mock.calls[0]![0] as string;
+    expect(calledUrl).toContain("https://rocketcoffee.co.nz/search/suggest.json?");
+    expect(calledUrl).toContain("q=espresso");
+    expect(calledUrl).toContain("resources%5Btype%5D=product");
+    expect(calledUrl).toContain("resources%5Boptions%5D%5Bunavailable_products%5D=hide");
+  });
+
+  it("returns an empty array when the store has no matches", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ resources: { results: { products: [] } } })),
+    );
+    const result = await searchProducts(ROCKET, "nomatches");
+    expect(result).toEqual([]);
+  });
+
+  it("returns an empty array when the products key is absent", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ resources: { results: {} } })),
+    );
+    const result = await searchProducts(ROCKET, "x");
+    expect(result).toEqual([]);
   });
 });
 

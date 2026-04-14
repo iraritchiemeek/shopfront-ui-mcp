@@ -1,5 +1,3 @@
-import type { BrandTokens } from "../lib/brand.js";
-
 export type Variant = {
   id: number;
   title: string;
@@ -33,7 +31,6 @@ export type Payload = {
   shopify_url: string;
   products: Product[];
   title?: string;
-  tokens?: BrandTokens;
   template?: CardTemplate;
 };
 

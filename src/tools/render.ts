@@ -11,26 +11,14 @@ import { buildCartUrl } from "../shopify.js";
 import { PRODUCT_CARDS_URI } from "../widgets/registry.js";
 import { buildAppStubHtml } from "../widgets/stub.js";
 
-const brandTokensSchema = z.object({
-  primary: z.string(),
-  accent: z.string(),
-  bg: z.string(),
-  fg: z.string(),
-  muted: z.string(),
-  font: z.string(),
-  radius: z.string(),
-  logoUrl: z.string().optional(),
-  siteName: z.string().optional(),
-});
-
 const variantSchema = z.object({
   id: z.number().describe("Shopify variant ID"),
-  title: z.string().describe("Variant title, e.g. '250g / Whole Bean'"),
+  title: z.string().describe("Variant title, e.g. 'Large / Red'"),
   option1: z.string(),
   option2: z.string().nullable(),
   option3: z.string().nullable(),
   available: z.boolean(),
-  price: z.string().describe("Price as string, e.g. '26.00'"),
+  price: z.string().describe("Price as string, e.g. '19.99'"),
 });
 
 const imageSchema = z.object({
@@ -40,7 +28,7 @@ const imageSchema = z.object({
 });
 
 const optionSchema = z.object({
-  name: z.string().describe("Option name, e.g. 'WEIGHT' or 'GRIND'"),
+  name: z.string().describe("Option name, e.g. 'Size' or 'Color'"),
   position: z.number(),
   values: z.array(z.string()),
 });
@@ -49,21 +37,13 @@ const productSchema = z.object({
   id: z.number(),
   title: z.string(),
   handle: z.string(),
-  body_html: z.string().describe("HTML description with tasting notes"),
+  body_html: z.string().describe("Product description. Plain text or HTML. May be truncated."),
   vendor: z.string(),
   product_type: z.string(),
   tags: z.array(z.string()),
   variants: z.array(variantSchema),
   images: z.array(imageSchema),
   options: z.array(optionSchema),
-  flavor_notes: z
-    .array(z.string())
-    .optional()
-    .describe(
-      "Tasting / flavor notes parsed from body_html (e.g. ['Rhubarb', 'Cherry', 'Red plum']). " +
-        "Extract from phrases like 'flavours of X, Y & Z' in body_html. Title-case each note. " +
-        "Omit if none are present.",
-    ),
 });
 
 export interface RenderToolsContext {
@@ -92,11 +72,7 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
               ui: {
                 csp: {
                   connectDomains: ["https://cdn.shopify.com"],
-                  resourceDomains: [
-                    baseUrl,
-                    "https://fonts.googleapis.com",
-                    "https://fonts.gstatic.com",
-                  ],
+                  resourceDomains: [baseUrl],
                 },
               },
             },
@@ -111,21 +87,13 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
     "render_products",
     {
       description:
-        "Render products from a Shopify storefront as interactive, themed cards. Pass the " +
-        "curated product data from get_products and the brand tokens from analyze_site so the " +
-        "cards match the store's visual identity. The widget displays product images, tasting " +
-        "notes, prices, and variant selectors, and lets the user generate a cart link. For each " +
-        "product, parse flavour notes from body_html (phrases like 'flavours of X, Y & Z') and " +
-        "title-case them into flavor_notes — the widget prefers these over the raw description. " +
+        "Render products from a Shopify storefront as interactive cards. Pass curated products (trimmed — see the `code` tool's trim helper). The widget displays images, descriptions, prices, and variant selectors, and lets the user generate a cart link. " +
         "Always pass shopify_url so the cart link resolves to the same store. " +
         "IMPORTANT: After calling this tool, do NOT repeat the product data — the widget displays it visually.",
       inputSchema: {
         shopify_url: z.string().describe("Shopify store URL the products belong to"),
         products: z.array(productSchema).describe("Array of Shopify products to display"),
         title: z.string().optional().describe("Optional heading above the cards"),
-        tokens: brandTokensSchema
-          .optional()
-          .describe("Brand tokens from analyze_site — themes the cards to the store"),
         template: z
           .enum(["minimal", "bold", "editorial"])
           .optional()
@@ -135,14 +103,13 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
         ui: { resourceUri: PRODUCT_CARDS_URI },
       },
     },
-    async ({ shopify_url, products, title, tokens, template }) => {
+    async ({ shopify_url, products, title, template }) => {
       return {
         content: [{ type: "text" as const, text: "Products rendered in widget." }],
         structuredContent: {
           shopify_url,
           products,
           title,
-          tokens,
           template: template ?? "minimal",
         } as unknown as Record<string, unknown>,
       };

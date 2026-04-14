@@ -39,10 +39,8 @@ const mcpAppsCssVariables: Record<string, string> = {
   "--color-border-success": "#bbf7d0",
   "--color-border-warning": "#fde68a",
   "--color-border-disabled": "#e5e7eb",
-  // Fonts — rocket-coffee uses Roboto in production (loaded via Google Fonts
-  // in the stub HTML). Fall back to the system stack in Storybook.
   "--font-sans":
-    "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   "--font-mono":
     "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
   "--font-weight-normal": "400",

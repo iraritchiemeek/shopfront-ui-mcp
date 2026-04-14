@@ -28,10 +28,9 @@ Cloudflare Worker serving an MCP server that can browse and order from **any** S
 
 1. MCP client sends a request to the Worker
 2. `createMcpHandler` (from `agents/mcp`) handles MCP Streamable HTTP transport
-3. Data tools (`analyze_site`, `get_products`) register on a base `McpServer`, then `codeMcpServer` (`src/codemode-server.ts`) collapses them into a single `code` tool. The model writes a JS async arrow that calls `codemode.*` methods; the code runs in an isolated Dynamic Worker (`env.LOADER`, `globalOutbound: null`).
+3. The data tool (`get_products`) registers on a base `McpServer`, then `codeMcpServer` (`src/codemode-server.ts`) collapses it into a single `code` tool. The model writes a JS async arrow that calls `codemode.*` methods; the code runs in an isolated Dynamic Worker (`env.LOADER`, `globalOutbound: null`).
 4. Render tools (`render_products`, `get_cart_url`) register on the wrapper server **after** the codemode wrap so they remain direct MCP tool calls — required for the MCP Apps widget to mount and for the widget to call back into the host.
-5. `analyze_site` visits the target storefront via the Browser Rendering binding (`env.BROWSER` + `@cloudflare/puppeteer`) and returns `BrandTokens` (primary/accent/bg/fg/font/radius/logoUrl/siteName).
-6. The widget receives `tokens` in its payload and applies them as `--rc-brand-*` CSS variables on its root; Tailwind utility classes resolve through those vars.
+5. The widget uses a fixed neutral palette (off-black/off-white) defined in `widgets/product-cards/style.css`. No per-store theming.
 
 ### Data source
 
@@ -59,21 +58,18 @@ The stub references JS/CSS via the request origin (`src/index.ts` passes `url.or
 widgets/
   product-cards/
     main.tsx                 — entry point
-    style.css                — Tailwind + brand tokens (CSS vars)
+    style.css                — Tailwind + fixed neutral palette
     types.ts                 — Payload, Product, CardTemplate
     components/              — pure React view components
     ProductCards.stories.tsx — Storybook stories
   lib/
     AppWrapper.tsx           — shared host connection / loading / error
     useToolResult.ts         — shared hook (useApp + useHostStyles + plumbing)
-    brand.ts                 — BrandTokens type + tokensToCssVars helper
 
 src/
-  analyze.ts                 — Browser Rendering token extraction
   codemode-server.ts         — collapses data tools into `code`
   shopify.ts                 — fetchProducts(storeUrl, filters), buildCartUrl(storeUrl, items)
   tools/
-    analyze.ts               — analyze_site
     products.ts              — get_products
     render.ts                — render_products + get_cart_url
   widgets/
@@ -89,7 +85,7 @@ scripts/build-widgets.ts     — discovers widgets, runs Vite in parallel
 
 ### Data flow
 
-LLM invokes the `code` tool with an async arrow that does `Promise.all([codemode.analyze_site(...), codemode.get_products(...)])`, curates the result, and returns `{ tokens, products }`. The LLM then calls `render_products` directly with `{ shopify_url, products, tokens, template }` → widget renders themed cards → user picks items → widget calls `get_cart_url({ shopify_url, items })` → displays checkout link.
+LLM invokes the `code` tool with an async arrow that calls `codemode.get_products(...)`, curates the result, and returns `{ products }`. The LLM then calls `render_products` directly with `{ shopify_url, products, template }` → widget renders cards → user picks items → widget calls `get_cart_url({ shopify_url, items })` → displays checkout link.
 
 ### Adding a new widget
 
