@@ -12,10 +12,7 @@ interface Props {
 
 export function ProductCardsView({ data, app }: Props) {
   const { products: rawProducts, title, shopify_url } = data;
-  const products = useMemo(
-    () => rawProducts.filter((p) => p.variants.length > 0),
-    [rawProducts],
-  );
+  const products = useMemo(() => rawProducts.filter((p) => p.variants.length > 0), [rawProducts]);
   const [selections, setSelections] = useState<Map<number, Selection>>(new Map());
   const [cartUrl, setCartUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
