@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMcpHandler } from "agents/mcp";
+import { registerAnalyzeTools } from "./tools/analyze.js";
 import { registerProductTools } from "./tools/products.js";
 import { registerRenderTools } from "./tools/render.js";
 
@@ -12,6 +13,7 @@ export interface Env {
 interface ServerContext {
   /** Origin of the Worker request — used as the base URL for Static Assets. */
   origin: string;
+  env: Env;
 }
 
 function createServer(context: ServerContext): McpServer {
@@ -21,6 +23,7 @@ function createServer(context: ServerContext): McpServer {
   });
 
   registerProductTools(server);
+  registerAnalyzeTools(server, { browser: context.env.BROWSER });
   registerRenderTools(server, {
     getAssetsBaseUrl: () => context.origin,
   });
@@ -66,7 +69,7 @@ export default {
     console.log(`[mcp] ${request.method} ${url.pathname} — ${methodLabel}`);
 
     try {
-      const server = createServer({ origin: url.origin });
+      const server = createServer({ origin: url.origin, env });
       return await createMcpHandler(server)(request, env, ctx);
     } catch (err) {
       const message = err instanceof Error ? `${err.message}\n${err.stack}` : String(err);
