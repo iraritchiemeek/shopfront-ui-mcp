@@ -22,7 +22,7 @@ export function registerProductTools(server: McpServer): void {
       },
     },
     async ({ product_type, tag }) => {
-      const products = await fetchProducts({ product_type, tag });
+      const products = await fetchProducts("https://rocketcoffee.co.nz", { product_type, tag });
       return {
         content: [{ type: "text" as const, text: JSON.stringify(products, null, 2) }],
       };

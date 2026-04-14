@@ -150,6 +150,7 @@ export function registerRenderTools(
     },
     async ({ items }) => {
       const cartUrl = buildCartUrl(
+        "https://rocketcoffee.co.nz",
         items.map((item) => ({ variantId: item.variant_id, quantity: item.quantity })),
       );
       return {

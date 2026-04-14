@@ -85,6 +85,8 @@ const sampleProducts = [
   },
 ];
 
+const ROCKET = "https://rocketcoffee.co.nz";
+
 describe("fetchProducts", () => {
   it("fetches and returns products", async () => {
     mockFetch.mockResolvedValueOnce(
@@ -94,7 +96,7 @@ describe("fetchProducts", () => {
       }),
     );
 
-    const result = await fetchProducts();
+    const result = await fetchProducts(ROCKET);
     expect(result).toHaveLength(2);
     expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
     expect(mockFetch).toHaveBeenCalledWith("https://rocketcoffee.co.nz/products.json", {
@@ -105,12 +107,33 @@ describe("fetchProducts", () => {
     });
   });
 
+  it("hits the store URL provided", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ products: [] })),
+    );
+
+    await fetchProducts("https://example.myshopify.com");
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://example.myshopify.com/products.json",
+      expect.anything(),
+    );
+  });
+
+  it("normalises bare hostnames and paths", async () => {
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ products: [] })));
+    await fetchProducts("allpress.co.nz");
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://allpress.co.nz/products.json",
+      expect.anything(),
+    );
+  });
+
   it("filters by product_type", async () => {
     mockFetch.mockResolvedValueOnce(
       new Response(JSON.stringify({ products: sampleProducts })),
     );
 
-    const result = await fetchProducts({ product_type: "COFFEE" });
+    const result = await fetchProducts(ROCKET, { product_type: "COFFEE" });
     expect(result).toHaveLength(1);
     expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
   });
@@ -120,7 +143,7 @@ describe("fetchProducts", () => {
       new Response(JSON.stringify({ products: sampleProducts })),
     );
 
-    const result = await fetchProducts({ tag: "FILTER" });
+    const result = await fetchProducts(ROCKET, { tag: "FILTER" });
     expect(result).toHaveLength(1);
     expect(result[0]!.title).toBe("Ethiopian Yirgacheffe");
   });
@@ -130,7 +153,7 @@ describe("fetchProducts", () => {
       new Response(JSON.stringify({ products: sampleProducts })),
     );
 
-    const result = await fetchProducts({ product_type: "coffee" });
+    const result = await fetchProducts(ROCKET, { product_type: "coffee" });
     expect(result).toHaveLength(1);
   });
 
@@ -139,7 +162,7 @@ describe("fetchProducts", () => {
       new Response(JSON.stringify({ products: sampleProducts })),
     );
 
-    const result = await fetchProducts({ tag: "DECAF" });
+    const result = await fetchProducts(ROCKET, { tag: "DECAF" });
     expect(result).toHaveLength(0);
   });
 
@@ -148,26 +171,33 @@ describe("fetchProducts", () => {
       new Response("Not Found", { status: 404 }),
     );
 
-    await expect(fetchProducts()).rejects.toThrow("Shopify returned 404");
+    await expect(fetchProducts(ROCKET)).rejects.toThrow("Shopify returned 404");
   });
 });
 
 describe("buildCartUrl", () => {
   it("builds URL for single item", () => {
-    const url = buildCartUrl([{ variantId: 12345, quantity: 1 }]);
+    const url = buildCartUrl(ROCKET, [{ variantId: 12345, quantity: 1 }]);
     expect(url).toBe("https://rocketcoffee.co.nz/cart/12345:1");
   });
 
   it("builds URL for multiple items", () => {
-    const url = buildCartUrl([
+    const url = buildCartUrl(ROCKET, [
       { variantId: 100, quantity: 2 },
       { variantId: 200, quantity: 1 },
     ]);
     expect(url).toBe("https://rocketcoffee.co.nz/cart/100:2,200:1");
   });
 
+  it("uses the provided host", () => {
+    const url = buildCartUrl("https://example.myshopify.com", [
+      { variantId: 1, quantity: 1 },
+    ]);
+    expect(url).toBe("https://example.myshopify.com/cart/1:1");
+  });
+
   it("handles empty items array", () => {
-    const url = buildCartUrl([]);
+    const url = buildCartUrl(ROCKET, []);
     expect(url).toBe("https://rocketcoffee.co.nz/cart/");
   });
 });

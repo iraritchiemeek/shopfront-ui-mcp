@@ -1,12 +1,25 @@
 import type { ShopifyProduct, ShopifyProductsResponse } from "./types/shopify.js";
 
-const STORE_URL = "https://rocketcoffee.co.nz";
+export function normaliseStoreOrigin(input: string): string {
+  const raw = input.trim();
+  if (!raw) throw new Error("Shopify URL is empty");
+  const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    return new URL(withScheme).origin;
+  } catch {
+    throw new Error(`Invalid Shopify URL: ${input}`);
+  }
+}
 
-export async function fetchProducts(filters?: {
-  product_type?: string;
-  tag?: string;
-}): Promise<ShopifyProduct[]> {
-  const res = await fetch(`${STORE_URL}/products.json`, {
+export async function fetchProducts(
+  storeUrl: string,
+  filters?: {
+    product_type?: string;
+    tag?: string;
+  },
+): Promise<ShopifyProduct[]> {
+  const origin = normaliseStoreOrigin(storeUrl);
+  const res = await fetch(`${origin}/products.json`, {
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; RocketCoffeeMCP/1.0)",
       Accept: "application/json",
@@ -31,7 +44,11 @@ export async function fetchProducts(filters?: {
   return products;
 }
 
-export function buildCartUrl(items: { variantId: number; quantity: number }[]): string {
+export function buildCartUrl(
+  storeUrl: string,
+  items: { variantId: number; quantity: number }[],
+): string {
+  const origin = normaliseStoreOrigin(storeUrl);
   const cartItems = items.map((item) => `${item.variantId}:${item.quantity}`).join(",");
-  return `${STORE_URL}/cart/${cartItems}`;
+  return `${origin}/cart/${cartItems}`;
 }
