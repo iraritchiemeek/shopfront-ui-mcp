@@ -101,7 +101,7 @@ Tests use `@cloudflare/vitest-pool-workers` with `cloudflareTest()`. Mock `globa
 
 ## Key constraints
 
-- `@modelcontextprotocol/sdk` is pinned to `1.28.0` to match the version `agents` bundles internally.
+- `@modelcontextprotocol/sdk` is pinned to `1.26.0` and `agents` is pinned to `0.8.5` — required for compatibility with `@cloudflare/codemode` (0.3.x peers 1.26.0).
 - `package.json` has `"type": "module"` — required for the vitest pool.
 
 ## Workflow Rules

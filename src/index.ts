@@ -3,8 +3,11 @@ import { createMcpHandler } from "agents/mcp";
 import { registerProductTools } from "./tools/products.js";
 import { registerRenderTools } from "./tools/render.js";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Env {}
+export interface Env {
+  ASSETS: Fetcher;
+  BROWSER: Fetcher;
+  LOADER: WorkerLoader;
+}
 
 interface ServerContext {
   /** Origin of the Worker request — used as the base URL for Static Assets. */
