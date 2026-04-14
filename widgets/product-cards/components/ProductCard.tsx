@@ -106,9 +106,21 @@ export function ProductCard({
             <button
               type="button"
               onClick={() => onOpenLink(buildProductUrl(shopifyUrl, active.handle))}
-              className="cursor-pointer bg-transparent p-0 text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
+              className="group inline-flex cursor-pointer items-center gap-1 bg-transparent p-0 text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
             >
               View full details
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+                className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.25 10a.75.75 0 0 1 .75-.75h8.19l-2.97-2.97a.75.75 0 1 1 1.06-1.06l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06l2.97-2.97H5a.75.75 0 0 1-.75-.75Z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </button>
           </p>
 
