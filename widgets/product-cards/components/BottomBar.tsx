@@ -20,7 +20,7 @@ function formatPrice(n: number): string {
 
 export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: Props) {
   return (
-    <div className="sticky bottom-0 mt-8 rounded-xl bg-white shadow-lg dark:bg-slate-800 dark:shadow-none">
+    <div className="sticky bottom-0 mt-8 rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
       <ul className="divide-y divide-stone-200 px-5 dark:divide-slate-700">
         {items.map((item) => {
           const showVariant = item.variantTitle && item.variantTitle !== "Default Title";

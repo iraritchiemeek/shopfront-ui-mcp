@@ -193,7 +193,7 @@ export function ProductCard({
                 const id = `option-${active.id}-${idx}`;
                 const selectedVal = optionValues[idx] ?? "";
                 return (
-                  <div key={opt.name} className="min-w-[8rem] flex-1">
+                  <div key={opt.name} className="min-w-[8rem] flex-1 @xl:max-w-[16rem]">
                     <label
                       htmlFor={id}
                       className="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-slate-400"
