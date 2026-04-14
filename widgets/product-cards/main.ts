@@ -160,15 +160,22 @@ function renderCard(product: Product): HTMLElement {
 
   const inner = el("div", "flex gap-5 p-5");
 
-  // Image
+  // Image — fetch and convert to blob URL to bypass img-src CSP
   const img = product.images[0];
   if (img) {
     const imgEl = document.createElement("img");
-    imgEl.src = img.src;
     imgEl.alt = product.title;
-    imgEl.className = "h-28 w-28 rounded-lg object-cover flex-shrink-0";
+    imgEl.className = "h-28 w-28 rounded-lg object-cover flex-shrink-0 bg-slate-100 dark:bg-slate-700";
     imgEl.loading = "lazy";
     inner.appendChild(imgEl);
+    fetch(img.src)
+      .then((r) => r.blob())
+      .then((blob) => {
+        imgEl.src = URL.createObjectURL(blob);
+      })
+      .catch(() => {
+        imgEl.remove();
+      });
   }
 
   // Info

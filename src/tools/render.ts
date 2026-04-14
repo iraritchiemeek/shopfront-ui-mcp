@@ -60,7 +60,7 @@ export function registerRenderTools(server: McpServer): void {
       description: "Coffee product cards rendered inline in chat.",
       _meta: {
         ui: {
-          csp: { connectDomains: ["cdn.shopify.com"] },
+          csp: { connectDomains: ["https://cdn.shopify.com"] },
         },
       },
     },
@@ -72,7 +72,7 @@ export function registerRenderTools(server: McpServer): void {
           text: PRODUCT_CARDS_HTML,
           _meta: {
             ui: {
-              csp: { connectDomains: ["cdn.shopify.com"] },
+              csp: { connectDomains: ["https://cdn.shopify.com"] },
             },
           },
         },
