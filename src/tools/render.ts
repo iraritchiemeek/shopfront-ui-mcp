@@ -28,21 +28,29 @@ const imageSchema = z.object({
 });
 
 const optionSchema = z.object({
-  name: z.string().describe("Option name, e.g. 'Size' or 'Color'"),
+  name: z.string().describe("Option name, e.g. 'Size' or 'Weight'"),
   position: z.number(),
   values: z.array(z.string()),
-  display: z
-    .enum(["select", "swatches"])
+});
+
+const swatchSchema = z.object({
+  color: z
+    .string()
+    .describe("CSS color for the swatch circle (hex, named, or CSS color string)."),
+  label: z.string().describe("Human-readable label, e.g. 'Walnut'."),
+});
+
+const siblingProductSchema = z.object({
+  id: z.number(),
+  handle: z.string(),
+  title: z
+    .string()
     .optional()
-    .describe(
-      "How the widget should render this option. 'swatches' shows coloured circles (use for color/finish options when you can provide hex values); 'select' (default) shows a labelled dropdown.",
-    ),
-  swatches: z
-    .record(z.string(), z.string())
-    .optional()
-    .describe(
-      "Required when display='swatches'. Map of option value -> CSS color (hex, named, or CSS color string) to render as the swatch background. Keys must match the entries in `values`.",
-    ),
+    .describe("Optional override title if the sibling's title differs from the primary product."),
+  images: z.array(imageSchema),
+  variants: z.array(variantSchema).min(1),
+  options: z.array(optionSchema),
+  swatch: swatchSchema,
 });
 
 const productSchema = z.object({
@@ -61,6 +69,15 @@ const productSchema = z.object({
     .optional()
     .describe(
       "Optional short line shown below the title for extra product detail (e.g. roast level, origin, availability).",
+    ),
+  swatch: swatchSchema
+    .optional()
+    .describe("Swatch metadata for this product when it belongs to a sibling group."),
+  siblings: z
+    .array(siblingProductSchema)
+    .optional()
+    .describe(
+      "Sibling products that represent alternative finishes/colours of this item, each sold as its own Shopify product (e.g. 'Osaka Coffee Table - Walnut' and 'Osaka Coffee Table - Natural'). When provided, the widget shows a swatch selector above the image and swapping swatches swaps the active card (images, variants, price, cart target). Always set `swatch` on the primary product when supplying siblings.",
     ),
 });
 

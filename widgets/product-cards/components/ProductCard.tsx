@@ -1,13 +1,23 @@
 import { useMemo, useState } from "react";
-import type { Product, Selection, Variant } from "../types.js";
+import type { Product, ProductImage, ProductOption, Selection, Swatch, Variant } from "../types.js";
 import { ProductImageCarousel } from "./ProductImageCarousel.js";
 
 interface Props {
   product: Product;
   shopifyUrl: string;
-  selection: Selection | null;
-  onChange: (next: Selection | null) => void;
+  selections: ReadonlyMap<number, Selection>;
+  onSelectionChange: (productId: number, next: Selection | null) => void;
   onOpenLink: (url: string) => void;
+}
+
+interface ActiveView {
+  id: number;
+  handle: string;
+  title: string;
+  images: ProductImage[];
+  variants: Variant[];
+  options: ProductOption[];
+  swatch?: Swatch;
 }
 
 function formatPrice(amount: string): string {
@@ -15,13 +25,19 @@ function formatPrice(amount: string): string {
   return Number.isNaN(n) ? `$${amount}` : `$${n.toFixed(2)}`;
 }
 
-function findVariant(product: Product, values: string[]): Variant | undefined {
-  return product.variants.find((v) => {
+function findVariant(variants: Variant[], values: string[]): Variant | undefined {
+  return variants.find((v) => {
     if (v.option1 !== values[0]) return false;
     if (values[1] !== undefined && v.option2 !== values[1]) return false;
     if (values[2] !== undefined && v.option3 !== values[2]) return false;
     return true;
   });
+}
+
+function defaultOptionValues(variant: Variant): string[] {
+  return [variant.option1, variant.option2, variant.option3].filter(
+    (v): v is string => v !== null,
+  );
 }
 
 function buildProductUrl(shopifyUrl: string, handle: string): string {
@@ -33,35 +49,63 @@ function buildProductUrl(shopifyUrl: string, handle: string): string {
   }
 }
 
-export function ProductCard({ product, shopifyUrl, selection, onChange, onOpenLink }: Props) {
-  const firstVariant = product.variants[0]!;
-  const defaultValues = useMemo(
-    () =>
-      [firstVariant.option1, firstVariant.option2, firstVariant.option3].filter(
-        (v): v is string => v !== null,
-      ),
-    [firstVariant],
-  );
-  const [optionValues, setOptionValues] = useState<string[]>(defaultValues);
+export function ProductCard({
+  product,
+  shopifyUrl,
+  selections,
+  onSelectionChange,
+  onOpenLink,
+}: Props) {
+  const views = useMemo<ActiveView[]>(() => {
+    const primary: ActiveView = {
+      id: product.id,
+      handle: product.handle,
+      title: product.title,
+      images: product.images,
+      variants: product.variants,
+      options: product.options,
+      swatch: product.swatch,
+    };
+    const siblingViews: ActiveView[] = (product.siblings ?? []).map((s) => ({
+      id: s.id,
+      handle: s.handle,
+      title: s.title ?? product.title,
+      images: s.images,
+      variants: s.variants,
+      options: s.options,
+      swatch: s.swatch,
+    }));
+    return [primary, ...siblingViews];
+  }, [product]);
 
-  const selectedVariant = findVariant(product, optionValues) ?? firstVariant;
+  const [activeIdx, setActiveIdx] = useState(0);
+  const active = views[activeIdx] ?? views[0]!;
+  const showSwatches = views.length > 1 && views.every((v) => v.swatch);
+
+  // Option values are scoped per active view. Initialise lazily from each view's first variant.
+  const [optionValuesByIdx, setOptionValuesByIdx] = useState<Map<number, string[]>>(new Map());
+  const optionValues =
+    optionValuesByIdx.get(activeIdx) ?? defaultOptionValues(active.variants[0]!);
+
+  const selectedVariant = findVariant(active.variants, optionValues) ?? active.variants[0]!;
+  const selection = selections.get(active.id) ?? null;
   const qty = selection?.quantity ?? 0;
 
   const setQty = (next: number): void => {
     if (next <= 0) {
-      onChange(null);
+      onSelectionChange(active.id, null);
     } else {
-      onChange({ variantId: selectedVariant.id, quantity: next });
+      onSelectionChange(active.id, { variantId: selectedVariant.id, quantity: next });
     }
   };
 
   const handleOptionChange = (idx: number, value: string): void => {
     const next = [...optionValues];
     next[idx] = value;
-    setOptionValues(next);
+    setOptionValuesByIdx((prev) => new Map(prev).set(activeIdx, next));
     if (qty > 0) {
-      const variant = findVariant(product, next);
-      if (variant) onChange({ variantId: variant.id, quantity: qty });
+      const variant = findVariant(active.variants, next);
+      if (variant) onSelectionChange(active.id, { variantId: variant.id, quantity: qty });
     }
   };
 
@@ -69,11 +113,15 @@ export function ProductCard({ product, shopifyUrl, selection, onChange, onOpenLi
     <div className="overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
       <div className="grid grid-cols-1 gap-x-6 gap-y-6 p-4 sm:grid-cols-12 sm:gap-y-8 sm:p-6 lg:gap-x-8">
         <div className="sm:col-span-5">
-          <ProductImageCarousel images={product.images} alt={product.title} />
+          <ProductImageCarousel
+            key={active.id}
+            images={active.images}
+            alt={active.title}
+          />
         </div>
 
         <div className="flex flex-col sm:col-span-7">
-          <h2 className="text-xl font-bold text-brand sm:pr-6">{product.title}</h2>
+          <h2 className="text-xl font-bold text-brand sm:pr-6">{active.title}</h2>
 
           <p className="mt-3 text-xl text-brand tabular-nums">
             {formatPrice(selectedVariant.price)}
@@ -83,10 +131,54 @@ export function ProductCard({ product, shopifyUrl, selection, onChange, onOpenLi
             <p className="mt-3 text-sm text-stone-600 dark:text-slate-400">{product.subtext}</p>
           )}
 
-          {product.variants.length > 1 && (
+          {showSwatches && (
+            <div className="mt-6">
+              <span className="block text-sm/6 font-medium text-brand dark:text-white">
+                {active.swatch ? (
+                  <>
+                    {product.options[0]?.name ?? "Finish"}
+                    <span className="ml-2 font-normal text-stone-500 dark:text-slate-400">
+                      {active.swatch.label}
+                    </span>
+                  </>
+                ) : (
+                  "Finish"
+                )}
+              </span>
+              <fieldset aria-label="Finish" className="mt-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  {views.map((v, i) => {
+                    if (!v.swatch) return null;
+                    const checked = activeIdx === i;
+                    return (
+                      <label
+                        key={v.id}
+                        title={v.swatch.label}
+                        className="flex cursor-pointer rounded-full outline -outline-offset-1 outline-black/10 dark:outline-white/20"
+                      >
+                        <input
+                          type="radio"
+                          name={`product-${product.id}-finish`}
+                          value={String(v.id)}
+                          checked={checked}
+                          onChange={() => setActiveIdx(i)}
+                          aria-label={v.swatch.label}
+                          style={{ backgroundColor: v.swatch.color }}
+                          className="size-8 appearance-none rounded-full forced-color-adjust-none checked:outline-2 checked:outline-offset-2 checked:outline-brand focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-brand dark:checked:outline-white dark:focus-visible:outline-white"
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            </div>
+          )}
+
+          {active.variants.length > 1 && (
             <div className="mt-6 flex flex-wrap gap-4">
-              {product.options.map((opt, idx) => {
-                const id = `option-${product.id}-${idx}`;
+              {active.options.map((opt, idx) => {
+                const id = `option-${active.id}-${idx}`;
+                const selectedVal = optionValues[idx] ?? "";
                 return (
                   <div key={opt.name} className="w-full sm:w-48">
                     <label
@@ -98,7 +190,7 @@ export function ProductCard({ product, shopifyUrl, selection, onChange, onOpenLi
                     <div className="mt-2 grid grid-cols-1">
                       <select
                         id={id}
-                        value={optionValues[idx] ?? ""}
+                        value={selectedVal}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
                         className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-brand outline-1 -outline-offset-1 outline-stone-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:*:bg-slate-800 dark:focus-visible:outline-brand"
                       >
@@ -137,33 +229,45 @@ export function ProductCard({ product, shopifyUrl, selection, onChange, onOpenLi
                 Add to cart
               </button>
             ) : (
-              <div className="flex items-center justify-between rounded-md border border-stone-200 bg-stone-50 p-1.5 dark:border-slate-600 dark:bg-slate-700">
-                <button
-                  type="button"
-                  onClick={() => setQty(qty - 1)}
-                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md bg-white text-lg font-semibold text-brand transition-colors hover:bg-stone-100 dark:bg-slate-800 dark:hover:bg-slate-600"
-                  aria-label="Decrease quantity"
+              <button
+                type="button"
+                onClick={() => setQty(0)}
+                className="group inline-flex cursor-pointer items-center gap-2 rounded-md border border-brand/30 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-red-400/40 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                aria-label="Remove from cart"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="size-4 shrink-0 group-hover:hidden"
                 >
-                  −
-                </button>
-                <span className="text-sm font-medium text-brand tabular-nums">
-                  {qty} in cart
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQty(qty + 1)}
-                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md bg-brand text-lg font-semibold text-white transition-colors hover:bg-brand-hover"
-                  aria-label="Increase quantity"
+                  <path
+                    fillRule="evenodd"
+                    d="M16.704 5.29a.75.75 0 0 1 .006 1.06l-7.5 7.59a.75.75 0 0 1-1.07.002L3.29 9.09a.75.75 0 1 1 1.06-1.06l4.283 4.28 6.97-7.05a.75.75 0 0 1 1.06.03Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="hidden size-4 shrink-0 group-hover:block"
                 >
-                  +
-                </button>
-              </div>
+                  <path
+                    fillRule="evenodd"
+                    d="M4.28 4.22a.75.75 0 0 1 1.06 0L10 8.94l4.66-4.72a.75.75 0 1 1 1.06 1.06L11.06 10l4.66 4.72a.75.75 0 1 1-1.06 1.06L10 11.06l-4.66 4.72a.75.75 0 1 1-1.06-1.06L8.94 10 4.28 5.28a.75.75 0 0 1 0-1.06Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="group-hover:hidden">In cart ({qty})</span>
+                <span className="hidden group-hover:inline">Remove</span>
+              </button>
             )}
 
             <p className="mt-3 text-center">
               <button
                 type="button"
-                onClick={() => onOpenLink(buildProductUrl(shopifyUrl, product.handle))}
+                onClick={() => onOpenLink(buildProductUrl(shopifyUrl, active.handle))}
                 className="cursor-pointer bg-transparent p-0 text-sm font-medium text-brand underline-offset-4 hover:underline dark:text-white"
               >
                 View full details

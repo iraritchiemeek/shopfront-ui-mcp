@@ -300,6 +300,44 @@ const mockaOsakaCoffeeTable: Product = {
       price: "319.99",
     },
   ],
+  swatch: { color: "#5c4033", label: "Walnut" },
+  siblings: [
+    {
+      id: 10784587317551,
+      handle: "osaka-coffee-table-natural",
+      title: "Osaka Coffee Table - Natural",
+      swatch: { color: "#d4b48c", label: "Natural" },
+      images: [
+        {
+          src: "https://cdn.shopify.com/s/files/1/0830/6340/6895/files/T04543_Low_01_e1321130-3f16-45aa-8104-8d3a0ffffca0.jpg?v=1771409411",
+          width: 1200,
+          height: 1200,
+        },
+        {
+          src: "https://cdn.shopify.com/s/files/1/0830/6340/6895/files/T04543_Low_02_3be05a93-0311-4ec6-8b31-c839e21d1b96.jpg?v=1771409411",
+          width: 1200,
+          height: 1200,
+        },
+        {
+          src: "https://cdn.shopify.com/s/files/1/0830/6340/6895/files/T04543_Low_03_657d0595-312b-4093-9ac0-05514b08743e.jpg?v=1771409411",
+          width: 1200,
+          height: 1200,
+        },
+      ],
+      options: [{ name: "Title", position: 1, values: ["Default Title"] }],
+      variants: [
+        {
+          id: 51985044275503,
+          title: "Default Title",
+          option1: "Default Title",
+          option2: null,
+          option3: null,
+          available: true,
+          price: "239.99",
+        },
+      ],
+    },
+  ],
 };
 
 export const MockaOsakaCoffeeTable: Story = {

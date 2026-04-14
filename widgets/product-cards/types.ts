@@ -13,8 +13,18 @@ export type ProductOption = {
   name: string;
   position: number;
   values: string[];
-  display?: "select" | "swatches";
-  swatches?: Record<string, string>;
+};
+
+export type Swatch = { color: string; label: string };
+
+export type SiblingProduct = {
+  id: number;
+  handle: string;
+  title?: string;
+  images: ProductImage[];
+  variants: Variant[];
+  options: ProductOption[];
+  swatch: Swatch;
 };
 
 export type Product = {
@@ -29,6 +39,8 @@ export type Product = {
   images: ProductImage[];
   options: ProductOption[];
   subtext?: string;
+  swatch?: Swatch;
+  siblings?: SiblingProduct[];
 };
 
 export type CardTemplate = "minimal" | "bold" | "editorial";

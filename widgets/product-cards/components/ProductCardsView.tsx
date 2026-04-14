@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { App } from "@modelcontextprotocol/ext-apps/react";
 import type { Payload, Product, Selection } from "../types.js";
 import { ProductCard } from "./ProductCard.js";
-import { BottomBar } from "./BottomBar.js";
+import { BottomBar, type CartLineItem } from "./BottomBar.js";
 
 interface Props {
   data: Payload;
@@ -47,20 +47,60 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
     });
   }, []);
 
-  const totals = useMemo(() => {
-    let items = 0;
-    let price = 0;
+  const setQuantity = useCallback((productId: number, next: number) => {
+    setSelections((prev) => {
+      const map = new Map(prev);
+      const current = map.get(productId);
+      if (!current) return prev;
+      if (next <= 0) {
+        map.delete(productId);
+      } else {
+        map.set(productId, { ...current, quantity: next });
+      }
+      return map;
+    });
+  }, []);
+
+  const lineItems = useMemo<CartLineItem[]>(() => {
+    const items: CartLineItem[] = [];
+    const views: Array<{
+      id: number;
+      title: string;
+      variants: typeof products[number]["variants"];
+      images: typeof products[number]["images"];
+    }> = [];
     for (const p of products) {
-      const sel = selections.get(p.id);
-      if (!sel) continue;
-      const v = p.variants.find((x) => x.id === sel.variantId);
-      if (v) {
-        items += sel.quantity;
-        price += parseFloat(v.price) * sel.quantity;
+      views.push({ id: p.id, title: p.title, variants: p.variants, images: p.images });
+      for (const s of p.siblings ?? []) {
+        views.push({
+          id: s.id,
+          title: s.title ?? `${p.title} · ${s.swatch.label}`,
+          variants: s.variants,
+          images: s.images,
+        });
       }
     }
-    return { items, price };
+    for (const v of views) {
+      const sel = selections.get(v.id);
+      if (!sel) continue;
+      const variant = v.variants.find((x) => x.id === sel.variantId);
+      if (!variant) continue;
+      items.push({
+        productId: v.id,
+        title: v.title,
+        variantTitle: variant.title,
+        thumbnail: v.images[0]?.src ?? null,
+        unitPrice: parseFloat(variant.price),
+        quantity: sel.quantity,
+      });
+    }
+    return items;
   }, [products, selections]);
+
+  const totalPrice = useMemo(
+    () => lineItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
+    [lineItems],
+  );
 
   const cartUrl = useMemo(() => {
     const items = Array.from(selections.values()).filter((s) => s.quantity > 0);
@@ -84,18 +124,19 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
                 key={product.id}
                 product={product}
                 shopifyUrl={shopify_url}
-                selection={selections.get(product.id) ?? null}
-                onChange={(next) => setSelection(product.id, next)}
+                selections={selections}
+                onSelectionChange={setSelection}
                 onOpenLink={handleOpenLink}
               />
             ))}
           </div>
         )}
 
-        {totals.items > 0 && cartUrl && (
+        {lineItems.length > 0 && cartUrl && (
           <BottomBar
-            totalItems={totals.items}
-            totalPrice={totals.price}
+            items={lineItems}
+            totalPrice={totalPrice}
+            onChangeQuantity={setQuantity}
             onCheckout={() => handleOpenLink(cartUrl)}
           />
         )}
