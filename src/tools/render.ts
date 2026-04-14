@@ -130,6 +130,7 @@ export function registerRenderTools(server: McpServer, context: RenderToolsConte
       description:
         "Render products from a Shopify storefront as interactive cards. Pass curated products (trimmed — see the `code` tool's trim helper). The widget displays images, descriptions, prices, and variant selectors, and lets the user generate a cart link. " +
         "Always pass shopify_url so the cart link resolves to the same store. " +
+        "IMPORTANT: Render at most 3 products per call. If you have more candidates, pick the top 3 most relevant to the user's request. " +
         "IMPORTANT: After calling this tool, do NOT repeat the product data — the widget displays it visually.",
       inputSchema: {
         shopify_url: z.string().describe("Shopify store URL the products belong to"),
