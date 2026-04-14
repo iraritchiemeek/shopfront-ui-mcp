@@ -67,8 +67,16 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
+    // Prefer the MCP session ID — remote clients (claude.ai, Claude Desktop,
+    // mobile) are brokered server-side by Anthropic, so cf-connecting-ip is
+    // Anthropic's egress pool and ~useless for per-user bucketing. The session
+    // ID is a per-client value set on initialize and required on every
+    // subsequent request by the Streamable HTTP spec. Fall back to IP for the
+    // initial request (which has no session yet) and for local/stdio clients.
+    const sessionId = request.headers.get("mcp-session-id");
     const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-    const { success } = await env.MCP_LIMITER.limit({ key: ip });
+    const limiterKey = sessionId ? `session:${sessionId}` : `ip:${ip}`;
+    const { success } = await env.MCP_LIMITER.limit({ key: limiterKey });
     if (!success) {
       return new Response("Rate limit exceeded. Try again in a minute.", {
         status: 429,
