@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { McpThemeDecorator } from "../../.storybook/decorator.js";
 import { ProductCardsView } from "./components/ProductCardsView.js";
-import { CartLink } from "./components/CartLink.js";
 import type { Payload, Product } from "./types.js";
 
 const meta: Meta = {
@@ -185,10 +184,6 @@ export const EmptyState: Story = {
   render: () => <ProductCardsView data={{ shopify_url: ROCKET_URL, products: [] }} app={null} />,
 };
 
-export const CartLinkState: Story = {
-  render: () => <CartLink url="https://rocketcoffee.co.nz/cart/101:1,201:2" />,
-};
-
 // ── Gearshop: MSR Hubba Hubba Bikepack Tent ─────────────────────────
 
 const msrHubbaHubba: Product = {
@@ -263,6 +258,57 @@ export const GearshopMsrHubbaHubba: Story = {
         shopify_url: "https://www.gearshop.co.nz",
         title: "Lightweight tents",
         products: [msrHubbaHubba],
+      }}
+      app={null}
+    />
+  ),
+};
+
+// ── Mocka: Osaka Coffee Table (Walnut) ──────────────────────────────
+
+const mockaOsakaCoffeeTable: Product = {
+  id: 10781703799087,
+  title: "Osaka Coffee Table - Walnut",
+  handle: "osaka-coffee-table-walnut",
+  body_html:
+    "<p>Add timeless style and function to your living room with the Osaka Coffee Table in Walnut. Featuring two sliding drawers for plenty of storage, this piece is perfect for mid-century or Japandi-inspired spaces.</p>",
+  vendor: "Mocka New Zealand",
+  product_type: "Furniture",
+  tags: ["label-rts", "Sub:CoffeeTable", "Type:Furniture"],
+  subtext: "Walnut finish · Two sliding drawers · Mid-century / Japandi",
+  images: [
+    {
+      src: "https://cdn.shopify.com/s/files/1/0830/6340/6895/files/T04542_LowRes_01.jpg?v=1771409010",
+      width: 1200,
+      height: 1200,
+    },
+    {
+      src: "https://cdn.shopify.com/s/files/1/0830/6340/6895/files/T04542_LowRes_04.jpg?v=1771409010",
+      width: 1200,
+      height: 1200,
+    },
+  ],
+  options: [{ name: "Title", position: 1, values: ["Default Title"] }],
+  variants: [
+    {
+      id: 51975211811119,
+      title: "Default Title",
+      option1: "Default Title",
+      option2: null,
+      option3: null,
+      available: true,
+      price: "319.99",
+    },
+  ],
+};
+
+export const MockaOsakaCoffeeTable: Story = {
+  render: () => (
+    <ProductCardsView
+      data={{
+        shopify_url: "https://www.mocka.co.nz",
+        title: "Coffee tables",
+        products: [mockaOsakaCoffeeTable],
       }}
       app={null}
     />

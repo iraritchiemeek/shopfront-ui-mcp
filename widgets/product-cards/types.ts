@@ -9,7 +9,13 @@ export type Variant = {
 };
 
 export type ProductImage = { src: string; width: number; height: number };
-export type ProductOption = { name: string; position: number; values: string[] };
+export type ProductOption = {
+  name: string;
+  position: number;
+  values: string[];
+  display?: "select" | "swatches";
+  swatches?: Record<string, string>;
+};
 
 export type Product = {
   id: number;

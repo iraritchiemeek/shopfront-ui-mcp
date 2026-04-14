@@ -3,7 +3,6 @@ import type { App } from "@modelcontextprotocol/ext-apps/react";
 import type { Payload, Product, Selection } from "../types.js";
 import { ProductCard } from "./ProductCard.js";
 import { BottomBar } from "./BottomBar.js";
-import { CartLink } from "./CartLink.js";
 
 interface Props {
   data: Payload;
@@ -11,7 +10,17 @@ interface Props {
   openLink?: (url: string) => void;
 }
 
-export function ProductCardsView({ data, app, openLink }: Props) {
+function buildCartUrl(shopifyUrl: string, items: { variantId: number; quantity: number }[]): string {
+  const parts = items.map((i) => `${i.variantId}:${i.quantity}`).join(",");
+  try {
+    const u = new URL(shopifyUrl);
+    return `${u.origin}/cart/${parts}`;
+  } catch {
+    return `${shopifyUrl.replace(/\/$/, "")}/cart/${parts}`;
+  }
+}
+
+export function ProductCardsView({ data, app: _app, openLink }: Props) {
   const handleOpenLink = useCallback(
     (url: string) => {
       if (openLink) {
@@ -25,9 +34,6 @@ export function ProductCardsView({ data, app, openLink }: Props) {
   const { products: rawProducts, title, shopify_url } = data;
   const products = useMemo(() => rawProducts.filter((p) => p.variants.length > 0), [rawProducts]);
   const [selections, setSelections] = useState<Map<number, Selection>>(new Map());
-  const [cartUrl, setCartUrl] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [cartError, setCartError] = useState<string | null>(null);
 
   const setSelection = useCallback((productId: number, next: Selection | null) => {
     setSelections((prev) => {
@@ -56,39 +62,11 @@ export function ProductCardsView({ data, app, openLink }: Props) {
     return { items, price };
   }, [products, selections]);
 
-  const generateCart = useCallback(async () => {
-    const items: { variant_id: number; quantity: number }[] = [];
-    for (const sel of selections.values()) {
-      if (sel.quantity > 0) {
-        items.push({ variant_id: sel.variantId, quantity: sel.quantity });
-      }
-    }
-    if (items.length === 0 || !app) return;
-
-    setIsGenerating(true);
-    setCartError(null);
-    try {
-      const result = (await app.callServerTool({
-        name: "get_cart_url",
-        arguments: { shopify_url, items },
-      })) as { structuredContent?: { cart_url?: string }; isError?: boolean };
-
-      const url = result?.structuredContent?.cart_url;
-      if (!url || result.isError) {
-        setCartError("Failed to generate cart URL.");
-      } else {
-        setCartUrl(url);
-      }
-    } catch (err) {
-      setCartError(`Failed to generate cart link: ${(err as Error).message ?? "unknown error"}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [app, selections, shopify_url]);
-
-  if (cartUrl) {
-    return <CartLink url={cartUrl} />;
-  }
+  const cartUrl = useMemo(() => {
+    const items = Array.from(selections.values()).filter((s) => s.quantity > 0);
+    if (items.length === 0) return null;
+    return buildCartUrl(shopify_url, items);
+  }, [selections, shopify_url]);
 
   return (
     <div className="w-full rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40">
@@ -114,18 +92,11 @@ export function ProductCardsView({ data, app, openLink }: Props) {
           </div>
         )}
 
-        {cartError && (
-          <div className="mt-4">
-            <StatusBanner message={cartError} tone="error" />
-          </div>
-        )}
-
-        {totals.items > 0 && (
+        {totals.items > 0 && cartUrl && (
           <BottomBar
             totalItems={totals.items}
             totalPrice={totals.price}
-            onGenerate={generateCart}
-            isGenerating={isGenerating}
+            onCheckout={() => handleOpenLink(cartUrl)}
           />
         )}
       </div>

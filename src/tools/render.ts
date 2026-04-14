@@ -31,6 +31,18 @@ const optionSchema = z.object({
   name: z.string().describe("Option name, e.g. 'Size' or 'Color'"),
   position: z.number(),
   values: z.array(z.string()),
+  display: z
+    .enum(["select", "swatches"])
+    .optional()
+    .describe(
+      "How the widget should render this option. 'swatches' shows coloured circles (use for color/finish options when you can provide hex values); 'select' (default) shows a labelled dropdown.",
+    ),
+  swatches: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe(
+      "Required when display='swatches'. Map of option value -> CSS color (hex, named, or CSS color string) to render as the swatch background. Keys must match the entries in `values`.",
+    ),
 });
 
 const productSchema = z.object({
