@@ -494,6 +494,29 @@ const merlyLeon: Product = {
 
 // ── Real: Ishinomaki Lab coffee tables (writing-page demo) ──────────
 
+const WOOD_SWATCHES = {
+  chestnutNatural: { color: "#c09a6b", label: "栗 / natural" },
+  chestnutSoil: { color: "#3e2a1f", label: "栗 / soil" },
+  yakushimaCedar: { color: "#a0785c", label: "屋久島地杉" },
+} as const;
+
+const CENTER_TABLE_HALF_IMG =
+  "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01CENTER_TABLE-HALF_Chestnut01_black_KLS.webp?v=1771903780";
+const CORNER_TABLE_IMG =
+  "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01CORNER_TABLE_Chestnut01_black_KLS.webp?v=1771902441";
+
+function singleWoodVariant(id: number, label: string, price: string): Variant {
+  return {
+    id,
+    title: label,
+    option1: label,
+    option2: null,
+    option3: null,
+    available: true,
+    price,
+  };
+}
+
 const ishinomakiCenterTableHalf: Product = {
   id: 10028504973609,
   title: "CENTER TABLE HALF - Lounge Series",
@@ -502,47 +525,34 @@ const ishinomakiCenterTableHalf: Product = {
   product_type: "Furniture",
   tags: [],
   subtext: "Low center table · Yakushima cedar or chestnut",
-  images: [
-    {
-      src: "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01CENTER_TABLE-HALF_Chestnut01_black_KLS.webp?v=1771903780",
-      width: 1200,
-      height: 1200,
-    },
-  ],
-  options: [
-    {
-      name: "Wood",
-      position: 1,
-      values: ["栗 / natural", "栗 / soil", "屋久島地杉"],
-    },
-  ],
+  images: [{ src: CENTER_TABLE_HALF_IMG, width: 1200, height: 1200 }],
+  options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutNatural.label] }],
   variants: [
+    singleWoodVariant(52740576772393, WOOD_SWATCHES.chestnutNatural.label, "154000"),
+  ],
+  swatch: WOOD_SWATCHES.chestnutNatural,
+  siblings: [
     {
-      id: 52740576772393,
-      title: "栗 / natural",
-      option1: "栗 / natural",
-      option2: null,
-      option3: null,
-      available: true,
-      price: "154000",
+      id: 10028504973610,
+      handle: "center-table-half-lounge-series-soil",
+      title: "CENTER TABLE HALF - Lounge Series",
+      swatch: WOOD_SWATCHES.chestnutSoil,
+      images: [{ src: CENTER_TABLE_HALF_IMG, width: 1200, height: 1200 }],
+      options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutSoil.label] }],
+      variants: [
+        singleWoodVariant(52740576805161, WOOD_SWATCHES.chestnutSoil.label, "154000"),
+      ],
     },
     {
-      id: 52740576805161,
-      title: "栗 / soil",
-      option1: "栗 / soil",
-      option2: null,
-      option3: null,
-      available: true,
-      price: "154000",
-    },
-    {
-      id: 52740576837929,
-      title: "屋久島地杉",
-      option1: "屋久島地杉",
-      option2: null,
-      option3: null,
-      available: true,
-      price: "93500",
+      id: 10028504973611,
+      handle: "center-table-half-lounge-series-cedar",
+      title: "CENTER TABLE HALF - Lounge Series",
+      swatch: WOOD_SWATCHES.yakushimaCedar,
+      images: [{ src: CENTER_TABLE_HALF_IMG, width: 1200, height: 1200 }],
+      options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.yakushimaCedar.label] }],
+      variants: [
+        singleWoodVariant(52740576837929, WOOD_SWATCHES.yakushimaCedar.label, "93500"),
+      ],
     },
   ],
 };
@@ -555,47 +565,34 @@ const ishinomakiCornerTable: Product = {
   product_type: "Furniture",
   tags: [],
   subtext: "Compact corner table · Yakushima cedar or chestnut",
-  images: [
-    {
-      src: "https://cdn.shopify.com/s/files/1/0896/8116/6633/files/01CORNER_TABLE_Chestnut01_black_KLS.webp?v=1771902441",
-      width: 1200,
-      height: 1200,
-    },
-  ],
-  options: [
-    {
-      name: "Wood",
-      position: 1,
-      values: ["栗 / natural", "栗 / soil", "屋久島地杉"],
-    },
-  ],
+  images: [{ src: CORNER_TABLE_IMG, width: 1200, height: 1200 }],
+  options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutNatural.label] }],
   variants: [
+    singleWoodVariant(52740531061033, WOOD_SWATCHES.chestnutNatural.label, "132000"),
+  ],
+  swatch: WOOD_SWATCHES.chestnutNatural,
+  siblings: [
     {
-      id: 52740531061033,
-      title: "栗 / natural",
-      option1: "栗 / natural",
-      option2: null,
-      option3: null,
-      available: true,
-      price: "132000",
+      id: 10028499534122,
+      handle: "corner-table-kobo-lounge-series-soil",
+      title: "CORNER TABLE - Kobo Lounge Series",
+      swatch: WOOD_SWATCHES.chestnutSoil,
+      images: [{ src: CORNER_TABLE_IMG, width: 1200, height: 1200 }],
+      options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutSoil.label] }],
+      variants: [
+        singleWoodVariant(52740531847465, WOOD_SWATCHES.chestnutSoil.label, "132000"),
+      ],
     },
     {
-      id: 52740531847465,
-      title: "栗 / soil",
-      option1: "栗 / soil",
-      option2: null,
-      option3: null,
-      available: true,
-      price: "132000",
-    },
-    {
-      id: 52740532633897,
-      title: "屋久島地杉",
-      option1: "屋久島地杉",
-      option2: null,
-      option3: null,
-      available: true,
-      price: "82500",
+      id: 10028499534123,
+      handle: "corner-table-kobo-lounge-series-cedar",
+      title: "CORNER TABLE - Kobo Lounge Series",
+      swatch: WOOD_SWATCHES.yakushimaCedar,
+      images: [{ src: CORNER_TABLE_IMG, width: 1200, height: 1200 }],
+      options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.yakushimaCedar.label] }],
+      variants: [
+        singleWoodVariant(52740532633897, WOOD_SWATCHES.yakushimaCedar.label, "82500"),
+      ],
     },
   ],
 };
