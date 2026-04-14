@@ -23,12 +23,20 @@ async function fetchShopifyJson<T>(url: string): Promise<T> {
 export function normaliseStoreOrigin(input: string): string {
   const raw = input.trim();
   if (!raw) throw new Error("Shopify URL is empty");
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) && !/^https?:\/\//i.test(raw)) {
+    throw new Error(`Invalid Shopify URL: ${input} (only http/https supported)`);
+  }
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  let url: URL;
   try {
-    return new URL(withScheme).origin;
+    url = new URL(withScheme);
   } catch {
     throw new Error(`Invalid Shopify URL: ${input}`);
   }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(`Invalid Shopify URL: ${input} (only http/https supported)`);
+  }
+  return url.origin;
 }
 
 export async function fetchProducts(
