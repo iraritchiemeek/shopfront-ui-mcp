@@ -16,16 +16,11 @@ export interface Env {
 
 const DAILY_CEILING = 20_000;
 
-async function checkDailyCeiling(
-  env: Env,
-  ctx: ExecutionContext,
-): Promise<boolean> {
+async function checkDailyCeiling(env: Env): Promise<boolean> {
   const key = `count:${new Date().toISOString().slice(0, 10)}`;
   const current = parseInt((await env.ABUSE_KV.get(key)) ?? "0", 10);
   if (current >= DAILY_CEILING) return false;
-  ctx.waitUntil(
-    env.ABUSE_KV.put(key, String(current + 1), { expirationTtl: 60 * 60 * 48 }),
-  );
+  await env.ABUSE_KV.put(key, String(current + 1), { expirationTtl: 60 * 60 * 48 });
   return true;
 }
 
@@ -81,7 +76,7 @@ export default {
       });
     }
 
-    if (!(await checkDailyCeiling(env, ctx))) {
+    if (!(await checkDailyCeiling(env))) {
       return new Response("Daily request ceiling reached.", { status: 429 });
     }
 
