@@ -85,7 +85,7 @@ export function ProductCard({
   return (
     <div className="@container overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-slate-700 dark:bg-slate-800/60">
       <div className="grid grid-cols-1 gap-x-6 gap-y-6 p-4 @xl:grid-cols-12 @xl:gap-y-8 @xl:p-6 @2xl:gap-x-8">
-        <div className="@xl:col-span-5 @xl:self-center">
+        <div className="mx-auto w-full max-w-xs @xl:col-span-5 @xl:max-w-none @xl:self-center">
           <ProductImageCarousel key={active.id} images={active.images} alt={active.title} />
         </div>
 
