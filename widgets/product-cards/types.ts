@@ -1,3 +1,5 @@
+import type { BrandTokens } from "../lib/brand.js";
+
 export type Variant = {
   id: number;
   title: string;
@@ -25,6 +27,13 @@ export type Product = {
   flavor_notes?: string[];
 };
 
-export type Payload = { products: Product[]; title?: string };
+export type CardTemplate = "minimal" | "bold" | "editorial";
+
+export type Payload = {
+  products: Product[];
+  title?: string;
+  tokens?: BrandTokens;
+  template?: CardTemplate;
+};
 
 export type Selection = { variantId: number; quantity: number };

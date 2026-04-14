@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { App } from "@modelcontextprotocol/ext-apps/react";
 import type { Payload, Product, Selection } from "../types.js";
+import { tokensToCssVars } from "../../lib/brand.js";
 import { ProductCard } from "./ProductCard.js";
 import { BottomBar } from "./BottomBar.js";
 import { CartLink } from "./CartLink.js";
@@ -11,7 +12,11 @@ interface Props {
 }
 
 export function ProductCardsView({ data, app }: Props) {
-  const { products, title } = data;
+  const { products, title, tokens } = data;
+  const themeStyle = useMemo(
+    () => (tokens ? (tokensToCssVars(tokens) as React.CSSProperties) : undefined),
+    [tokens],
+  );
   const [selections, setSelections] = useState<Map<number, Selection>>(new Map());
   const [cartUrl, setCartUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -81,7 +86,10 @@ export function ProductCardsView({ data, app }: Props) {
   }
 
   return (
-    <div className="w-full rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40">
+    <div
+      className="w-full rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40"
+      style={themeStyle}
+    >
       <div className="max-w-3xl p-8">
         {title && (
           <h2 className="mb-6 text-base font-bold tracking-widest text-brand uppercase">

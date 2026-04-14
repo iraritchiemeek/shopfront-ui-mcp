@@ -27,3 +27,20 @@ export const DEFAULT_BRAND_TOKENS: BrandTokens = {
   font: 'system-ui, -apple-system, "Segoe UI", sans-serif',
   radius: "8px",
 };
+
+/**
+ * Map BrandTokens to the CSS custom properties consumed by the widget's
+ * Tailwind theme. Apply to a wrapper element via the `style` prop.
+ */
+export function tokensToCssVars(tokens: BrandTokens): Record<string, string> {
+  return {
+    "--rc-brand-primary": tokens.primary,
+    "--rc-brand-primary-hover": tokens.primary,
+    "--rc-brand-accent": tokens.accent,
+    "--rc-brand-bg": tokens.bg,
+    "--rc-brand-fg": tokens.fg,
+    "--rc-brand-muted": tokens.muted,
+    "--rc-brand-font": tokens.font,
+    "--rc-brand-radius": tokens.radius,
+  };
+}
