@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product, ProductImage, ProductOption, Selection, Swatch, Variant } from "../types.js";
 import { ProductImageCarousel } from "./ProductImageCarousel.js";
 
@@ -97,6 +97,21 @@ export function ProductCard({
     } else {
       onSelectionChange(active.id, { variantId: selectedVariant.id, quantity: next });
     }
+  };
+
+  const [justAdded, setJustAdded] = useState(false);
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current);
+    };
+  }, []);
+
+  const handleAdd = (): void => {
+    setQty(qty + 1);
+    setJustAdded(true);
+    if (addedTimer.current) clearTimeout(addedTimer.current);
+    addedTimer.current = setTimeout(() => setJustAdded(false), 1200);
   };
 
   const handleOptionChange = (idx: number, value: string): void => {
@@ -220,49 +235,30 @@ export function ProductCard({
           )}
 
           <div className="mt-auto pt-6">
-            {qty === 0 ? (
-              <button
-                type="button"
-                onClick={() => setQty(1)}
-                className="flex w-full items-center justify-center rounded-md bg-brand px-8 py-3 text-base font-medium text-white transition-colors hover:bg-brand-hover focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:outline-none"
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="relative flex w-full items-center justify-center rounded-md bg-brand px-8 py-3 text-base font-medium text-white transition-colors hover:bg-brand-hover focus:ring-2 focus:ring-brand/50 focus:ring-offset-2 focus:outline-none"
+            >
+              <span
+                className={`transition-opacity duration-200 ${justAdded ? "opacity-0" : "opacity-100"}`}
               >
                 Add to cart
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setQty(0)}
-                className="group inline-flex cursor-pointer items-center gap-2 rounded-md border border-brand/30 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-red-400/40 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                aria-label="Remove from cart"
+              </span>
+              <span
+                aria-hidden={!justAdded}
+                className={`absolute inset-0 flex items-center justify-center gap-2 transition-opacity duration-200 ${justAdded ? "opacity-100" : "opacity-0"}`}
               >
-                <svg
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  className="size-4 shrink-0 group-hover:hidden"
-                >
+                <svg viewBox="0 0 20 20" fill="currentColor" className="size-5">
                   <path
                     fillRule="evenodd"
                     d="M16.704 5.29a.75.75 0 0 1 .006 1.06l-7.5 7.59a.75.75 0 0 1-1.07.002L3.29 9.09a.75.75 0 1 1 1.06-1.06l4.283 4.28 6.97-7.05a.75.75 0 0 1 1.06.03Z"
                     clipRule="evenodd"
                   />
                 </svg>
-                <svg
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  className="hidden size-4 shrink-0 group-hover:block"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.28 4.22a.75.75 0 0 1 1.06 0L10 8.94l4.66-4.72a.75.75 0 1 1 1.06 1.06L11.06 10l4.66 4.72a.75.75 0 1 1-1.06 1.06L10 11.06l-4.66 4.72a.75.75 0 1 1-1.06-1.06L8.94 10 4.28 5.28a.75.75 0 0 1 0-1.06Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="group-hover:hidden">In cart ({qty})</span>
-                <span className="hidden group-hover:inline">Remove</span>
-              </button>
-            )}
+                Added
+              </span>
+            </button>
 
             <p className="mt-3 text-center">
               <button

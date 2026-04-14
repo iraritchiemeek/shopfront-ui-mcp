@@ -352,3 +352,95 @@ export const MockaOsakaCoffeeTable: Story = {
     />
   ),
 };
+
+// ── Synthetic: colour swatches + two select options ─────────────────
+
+const JACKET_BLACK_IMG =
+  "https://cdn.shopify.com/s/files/1/1104/4168/files/Allbirds_WL_RN_SF_PDP_Natural_Grey_LAT.png?v=1751143404";
+const JACKET_NAVY_IMG =
+  "https://cdn.shopify.com/s/files/1/1104/4168/files/Allbirds_WL_RN_SF_PDP_Natural_Grey_HEL.png?v=1751143404";
+
+function jacketVariants(prefix: number): Variant[] {
+  const sizes = ["S", "M", "L", "XL"];
+  const fits = ["Regular", "Slim"];
+  const variants: Variant[] = [];
+  let n = 0;
+  for (const size of sizes) {
+    for (const fit of fits) {
+      n += 1;
+      variants.push({
+        id: prefix + n,
+        title: `${size} / ${fit}`,
+        option1: size,
+        option2: fit,
+        option3: null,
+        available: true,
+        price: "249.00",
+      });
+    }
+  }
+  return variants;
+}
+
+const alpineJacket: Product = {
+  id: 900000001,
+  title: "Alpine Shell Jacket",
+  handle: "alpine-shell-jacket-black",
+  body_html: "<p>Weatherproof three-layer shell for alpine travel.</p>",
+  vendor: "Northline",
+  product_type: "Jackets",
+  tags: ["waterproof", "shell"],
+  subtext: "3-layer waterproof shell · Fully taped seams · Adjustable hood",
+  images: [
+    { src: JACKET_BLACK_IMG, width: 1600, height: 1600 },
+    { src: JACKET_NAVY_IMG, width: 1600, height: 1600 },
+  ],
+  options: [
+    { name: "Size", position: 1, values: ["S", "M", "L", "XL"] },
+    { name: "Fit", position: 2, values: ["Regular", "Slim"] },
+  ],
+  variants: jacketVariants(900000100),
+  swatch: { color: "#111827", label: "Black" },
+  siblings: [
+    {
+      id: 900000002,
+      handle: "alpine-shell-jacket-navy",
+      title: "Alpine Shell Jacket - Navy",
+      swatch: { color: "#1e3a8a", label: "Navy" },
+      images: [
+        { src: JACKET_NAVY_IMG, width: 1600, height: 1600 },
+        { src: JACKET_BLACK_IMG, width: 1600, height: 1600 },
+      ],
+      options: [
+        { name: "Size", position: 1, values: ["S", "M", "L", "XL"] },
+        { name: "Fit", position: 2, values: ["Regular", "Slim"] },
+      ],
+      variants: jacketVariants(900000200),
+    },
+    {
+      id: 900000003,
+      handle: "alpine-shell-jacket-moss",
+      title: "Alpine Shell Jacket - Moss",
+      swatch: { color: "#4d5d3a", label: "Moss" },
+      images: [{ src: JACKET_BLACK_IMG, width: 1600, height: 1600 }],
+      options: [
+        { name: "Size", position: 1, values: ["S", "M", "L", "XL"] },
+        { name: "Fit", position: 2, values: ["Regular", "Slim"] },
+      ],
+      variants: jacketVariants(900000300),
+    },
+  ],
+};
+
+export const SiblingsWithTwoSelects: Story = {
+  render: () => (
+    <ProductCardsView
+      data={{
+        shopify_url: "https://example-outdoor.myshopify.com",
+        title: "Shell jackets",
+        products: [alpineJacket],
+      }}
+      app={null}
+    />
+  ),
+};

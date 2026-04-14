@@ -32,7 +32,7 @@ export function BottomBar({ items, totalPrice, onChangeQuantity, onCheckout }: P
                 )}
               </div>
 
-              <div className="ml-4 flex flex-1 flex-col">
+              <div className="ml-4 flex min-w-0 flex-1 flex-col">
                 <div>
                   <div className="flex justify-between gap-4 text-base font-medium text-brand dark:text-white">
                     <h3 className="truncate">{item.title}</h3>
