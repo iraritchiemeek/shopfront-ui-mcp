@@ -89,7 +89,7 @@ export function ProductCardsView({ data, app: _app, openLink }: Props) {
   }, [selections, shopify_url]);
 
   return (
-    <div className="w-full rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40">
+    <div className="w-full overflow-hidden rounded-2xl border border-stone-200 bg-stone-50 font-sans antialiased dark:border-slate-700 dark:bg-slate-900/40">
       <div className="px-4 py-8">
         {title && (
           <h2 className="mb-6 text-base font-bold tracking-widest text-brand uppercase">{title}</h2>
