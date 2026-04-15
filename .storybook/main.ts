@@ -15,6 +15,11 @@ const config: StorybookConfig = {
     if (process.env.STORYBOOK_BASE_PATH) {
       config.base = process.env.STORYBOOK_BASE_PATH;
     }
+    // Vite's `publicDir` defaults to `<root>/public`. Our `public/` is the
+    // Cloudflare Workers Static Assets dir and contains a prior Storybook
+    // build — leaving Vite to auto-copy it produces nested `storybook/` and
+    // `ui-apps/` dirs in the output that grow on every rebuild.
+    config.publicDir = false;
     return config;
   },
 };
