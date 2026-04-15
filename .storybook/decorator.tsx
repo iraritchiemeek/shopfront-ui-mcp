@@ -63,9 +63,6 @@ export const McpThemeDecorator: Decorator = (Story) => (
         ...mcpAppsCssVariables,
         fontFamily: "var(--font-sans)",
         color: "var(--color-text-primary)",
-        backgroundColor: "var(--color-background-primary)",
-        padding: "1.5rem",
-        minHeight: 200,
       } as React.CSSProperties
     }
   >
