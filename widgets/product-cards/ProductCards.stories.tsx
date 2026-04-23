@@ -527,9 +527,7 @@ const ishinomakiCenterTableHalf: Product = {
   subtext: "Low center table · Yakushima cedar or chestnut",
   images: [{ src: CENTER_TABLE_HALF_IMG, width: 1200, height: 1200 }],
   options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutNatural.label] }],
-  variants: [
-    singleWoodVariant(52740576772393, WOOD_SWATCHES.chestnutNatural.label, "154000"),
-  ],
+  variants: [singleWoodVariant(52740576772393, WOOD_SWATCHES.chestnutNatural.label, "154000")],
   swatch: WOOD_SWATCHES.chestnutNatural,
   siblings: [
     {
@@ -539,9 +537,7 @@ const ishinomakiCenterTableHalf: Product = {
       swatch: WOOD_SWATCHES.chestnutSoil,
       images: [{ src: CENTER_TABLE_HALF_IMG, width: 1200, height: 1200 }],
       options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutSoil.label] }],
-      variants: [
-        singleWoodVariant(52740576805161, WOOD_SWATCHES.chestnutSoil.label, "154000"),
-      ],
+      variants: [singleWoodVariant(52740576805161, WOOD_SWATCHES.chestnutSoil.label, "154000")],
     },
     {
       id: 10028504973611,
@@ -550,9 +546,7 @@ const ishinomakiCenterTableHalf: Product = {
       swatch: WOOD_SWATCHES.yakushimaCedar,
       images: [{ src: CENTER_TABLE_HALF_IMG, width: 1200, height: 1200 }],
       options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.yakushimaCedar.label] }],
-      variants: [
-        singleWoodVariant(52740576837929, WOOD_SWATCHES.yakushimaCedar.label, "93500"),
-      ],
+      variants: [singleWoodVariant(52740576837929, WOOD_SWATCHES.yakushimaCedar.label, "93500")],
     },
   ],
 };
@@ -567,9 +561,7 @@ const ishinomakiCornerTable: Product = {
   subtext: "Compact corner table · Yakushima cedar or chestnut",
   images: [{ src: CORNER_TABLE_IMG, width: 1200, height: 1200 }],
   options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutNatural.label] }],
-  variants: [
-    singleWoodVariant(52740531061033, WOOD_SWATCHES.chestnutNatural.label, "132000"),
-  ],
+  variants: [singleWoodVariant(52740531061033, WOOD_SWATCHES.chestnutNatural.label, "132000")],
   swatch: WOOD_SWATCHES.chestnutNatural,
   siblings: [
     {
@@ -579,9 +571,7 @@ const ishinomakiCornerTable: Product = {
       swatch: WOOD_SWATCHES.chestnutSoil,
       images: [{ src: CORNER_TABLE_IMG, width: 1200, height: 1200 }],
       options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.chestnutSoil.label] }],
-      variants: [
-        singleWoodVariant(52740531847465, WOOD_SWATCHES.chestnutSoil.label, "132000"),
-      ],
+      variants: [singleWoodVariant(52740531847465, WOOD_SWATCHES.chestnutSoil.label, "132000")],
     },
     {
       id: 10028499534123,
@@ -590,9 +580,7 @@ const ishinomakiCornerTable: Product = {
       swatch: WOOD_SWATCHES.yakushimaCedar,
       images: [{ src: CORNER_TABLE_IMG, width: 1200, height: 1200 }],
       options: [{ name: "Wood", position: 1, values: [WOOD_SWATCHES.yakushimaCedar.label] }],
-      variants: [
-        singleWoodVariant(52740532633897, WOOD_SWATCHES.yakushimaCedar.label, "82500"),
-      ],
+      variants: [singleWoodVariant(52740532633897, WOOD_SWATCHES.yakushimaCedar.label, "82500")],
     },
   ],
 };
@@ -636,11 +624,7 @@ export const IshinomakiCoffeeTables: Story = {
         shopify_url: "https://ishinomaki-lab.org",
         currency: "JPY",
         title: "Ishinomaki Lab — coffee / center tables",
-        products: [
-          ishinomakiCenterTableHalf,
-          ishinomakiCornerTable,
-          ishinomakiSideTable,
-        ],
+        products: [ishinomakiCenterTableHalf, ishinomakiCornerTable, ishinomakiSideTable],
       }}
       app={null}
     />
