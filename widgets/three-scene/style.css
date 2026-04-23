@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@custom variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand: #0a0a0a;
+  --color-brand-hover: #262626;
+  --color-accent: #0a0a0a;
+  --color-surface: #fafafa;
+  --color-ink: #0a0a0a;
+  --color-muted-ink: #6b7280;
+  --radius-brand: 0.5rem;
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue",
+    sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+}

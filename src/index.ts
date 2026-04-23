@@ -7,6 +7,7 @@ import { registerDetectTools } from "./tools/detect.js";
 import { registerProductTools } from "./tools/products.js";
 import { registerRenderTools } from "./tools/render.js";
 import { registerSearchTools } from "./tools/search.js";
+import { registerThreeTools } from "./tools/three.js";
 
 export interface Env {
   ASSETS: Fetcher;
@@ -56,6 +57,9 @@ async function createServer(context: ServerContext): Promise<McpServer> {
 
   const server = await codeMcpServer({ server: baseServer, executor });
   registerRenderTools(server, {
+    getAssetsBaseUrl: () => context.origin,
+  });
+  registerThreeTools(server, {
     getAssetsBaseUrl: () => context.origin,
   });
   return server;
